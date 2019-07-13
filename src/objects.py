@@ -1,3 +1,12 @@
+################################################################
+#
+# Author: Lorenzo Sonnino
+# GitHub: https://github.com/lsonnino
+#
+# This file contains every used object
+#
+################################################################
+
 import random
 import numpy as np
 import pygame

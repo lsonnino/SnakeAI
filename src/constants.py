@@ -1,3 +1,13 @@
+################################################################
+#
+# Author: Lorenzo Sonnino
+# GitHub: https://github.com/lsonnino
+#
+# This file contains every needed configuration and
+# global variables
+#
+################################################################
+
 # General Constants
 NAME = "SnakeAI"
 AI = True
@@ -6,25 +16,25 @@ FONT = "Arial"
 FONT_SIZE = 20
 
 # World constants
-WIN_SIZE = (500, 500)
-ROWS = 20
-COLUMNS = 20
+WIN_SIZE = (500, 500)  # The size of the window
+ROWS = 20  # The number of rows
+COLUMNS = 20  # The number of columns
 CASE_WIDTH = WIN_SIZE[0] / ROWS
 CASE_HEIGHT = WIN_SIZE[1] / COLUMNS
 
-FPS_AI = 30
-FPS_HUMAN = 10
+FPS_AI = 30  # The used frame rate if the AI plays (the bigger, the faster it plays)
+FPS_HUMAN = 10  # The used frame rate if the human plays
 if AI:
     FPS = FPS_AI
 else:
     FPS = FPS_HUMAN
 
-# Game style
+# Game style -- each color is defined in here
 EMPTY_COLOR = (230, 230, 240)
 FOOD_COLOR = (255, 59, 48)
 SNAKE_COLOR = (0,122,255)
-colors = [EMPTY_COLOR, FOOD_COLOR]
 TEXT_COLOR = (77, 76, 76)
+colors = [EMPTY_COLOR, FOOD_COLOR]
 
 # Objects constants
 EMPTY = 0

@@ -11,6 +11,9 @@
 #     * TensorFlow: manages the AI
 #     * Numpy: used to manage matrix
 #
+# This file is the main file -- this is the file that runs the game
+# (the constants file indicates whether the AI plays or not)
+#
 ################################################################
 
 from src.objects import *
