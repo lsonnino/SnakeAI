@@ -1,0 +1,30 @@
+# General Constants
+NAME = "SnakeAI"
+
+# Game constants
+WIN_SIZE = (500, 500)
+ROWS = 20
+COLUMNS = 20
+CASE_WIDTH = WIN_SIZE[0] / ROWS
+CASE_HEIGHT = WIN_SIZE[1] / COLUMNS
+
+FPS = 10
+FRAME_TIME = int(1000/FPS)
+
+# Game style
+EMPTY_COLOR = (0, 0, 0)
+FOOD_COLOR = (255, 0, 0)
+SNAKE_COLOR = (0, 255, 0)
+colors = [EMPTY_COLOR, FOOD_COLOR]
+TEXT_COLOR = (255, 255, 255)
+
+# Objects constants
+EMPTY = 0
+FOOD = 1
+SNAKE = 2
+
+RIGHT = 0
+TOP = 1
+LEFT = 2
+BOTTOM = 3
+NONE = -1
