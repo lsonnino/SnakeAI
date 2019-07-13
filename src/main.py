@@ -13,7 +13,6 @@
 #
 ################################################################
 
-import pygame
 from src.objects import *
 from src.constants import *
 
@@ -34,12 +33,16 @@ clock = pygame.time.Clock()
 
 
 # Get the font
-font = pygame.font.SysFont('Arial', 30)
+font = pygame.font.SysFont(FONT, FONT_SIZE)
 
 
 # Creates the map
 map = Map()
 map.spawn_food()
+
+
+# AI variables
+ai_generation = 1
 
 # Keeps the game running
 running = True
@@ -86,9 +89,13 @@ while running:
     map.draw(window)
 
     # Draw the texts
-    textsurface = font.render(str(map.snake.get_score()), False, TEXT_COLOR)
+    textsurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
     # Merge the texts with the window
-    window.blit(textsurface, (0, 0))
+    window.blit(textsurface, (10, 10))
+    if AI:
+        textsurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+        # Merge the texts with the window
+        window.blit(textsurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
 
     # Refresh the window
     pygame.display.flip()
