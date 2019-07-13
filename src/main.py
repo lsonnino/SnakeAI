@@ -60,6 +60,9 @@ while running:
                 running = False
                 break
 
+            if AI:
+                continue
+
             elif keys[pygame.K_LEFT]:
                 map.snake.direction = LEFT
             elif keys[pygame.K_RIGHT]:

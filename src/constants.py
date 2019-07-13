@@ -1,5 +1,6 @@
 # General Constants
 NAME = "SnakeAI"
+AI = True
 
 # Game constants
 WIN_SIZE = (500, 500)
@@ -8,8 +9,12 @@ COLUMNS = 20
 CASE_WIDTH = WIN_SIZE[0] / ROWS
 CASE_HEIGHT = WIN_SIZE[1] / COLUMNS
 
-FPS = 10
-FRAME_TIME = int(1000/FPS)
+FPS_AI = 30
+FPS_HUMAN = 10
+if AI:
+    FPS = FPS_AI
+else:
+    FPS = FPS_HUMAN
 
 # Game style
 EMPTY_COLOR = (0, 0, 0)
