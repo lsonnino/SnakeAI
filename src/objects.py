@@ -76,6 +76,8 @@ class Map(object):
         """
         Check whether the snake took the food or not
         If so, consume the food and spawn another
+
+        :return: True if some food has been taken, False otherwise
         """
         if self.map[self.snake.body[0]] == FOOD:
             # Remove the food
@@ -84,6 +86,10 @@ class Map(object):
             self.snake.took_food = True
             # Spawn some new food
             self.spawn_food()
+
+            return True
+
+        return False
 
 
 class Snake(object):

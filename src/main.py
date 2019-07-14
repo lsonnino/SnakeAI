@@ -51,6 +51,9 @@ while running:
     # Starts playing
     playing = True
 
+    # initialize reward
+    reward = 0
+
     while playing:
         for event in pygame.event.get():
             # Check special events
@@ -80,16 +83,17 @@ while running:
                 elif keys[pygame.K_DOWN]:
                     map.snake.direction = BOTTOM
 
-        # Make the snake move
-        if map.snake.walk():
-            # The snake is still alive
-            pass
-        else:
+        # Make the snake's move
+        if not map.snake.walk():
             # The snake died
             playing = False
+            reward = -1
             continue
 
-        map.check_food()
+        if map.check_food():
+            reward = 1
+        else:
+            reward = 0
 
         # Draw the components
         map.draw(window)
