@@ -18,6 +18,7 @@
 
 from src.objects import *
 from src.constants import *
+from src.ai import *
 
 # Start the game
 pygame.init()
@@ -36,8 +37,11 @@ clock = pygame.time.Clock()
 # Get the font
 font = pygame.font.SysFont(FONT, FONT_SIZE)
 
-# AI variables
-ai_generation = 1
+# setup AI
+if AI_PLAYS:
+    ai_generation = 1
+    network = DeepQNetwork()
+    ai = AI(EpsilonGreedyStrategy(), 5)
 
 map = Map()
 
@@ -70,18 +74,28 @@ while running:
                 playing = False
                 break
 
-            # Take action
-            if AI:
-                pass
+            # Get action
+            action = NONE
+            if AI_PLAYS:
+                # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
+                # The possible actions variables are values between -1 and 4 so we need to subtract 1
+                action = ai.select_action(
+                    torch.from_numpy(map_to_input(map)),
+                    network
+                ) - 1
             else:
                 if keys[pygame.K_LEFT]:
-                    map.snake.direction = LEFT
+                    action = LEFT
                 elif keys[pygame.K_RIGHT]:
-                    map.snake.direction = RIGHT
+                    action = RIGHT
                 elif keys[pygame.K_UP]:
-                    map.snake.direction = TOP
+                    action = TOP
                 elif keys[pygame.K_DOWN]:
-                    map.snake.direction = BOTTOM
+                    action = BOTTOM
+
+            # Perform action
+            if action != NONE:
+                map.snake.direction = action
 
         # Make the snake's move
         if not map.snake.walk():
@@ -102,7 +116,7 @@ while running:
         textsurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
         # Merge the texts with the window
         window.blit(textsurface, (10, 10))
-        if AI:
+        if AI_PLAYS:
             textsurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
             # Merge the texts with the window
             window.blit(textsurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
@@ -114,5 +128,5 @@ while running:
         clock.tick(FPS)
 
     # Pass to next generation
-    if AI:
+    if AI_PLAYS:
         ai_generation += 1

@@ -10,7 +10,7 @@
 
 # General Constants
 NAME = "SnakeAI"
-AI = False
+AI_PLAYS = True
 
 FONT = "Arial"
 FONT_SIZE = 20
@@ -24,7 +24,7 @@ CASE_HEIGHT = WIN_SIZE[1] / ROWS
 
 FPS_AI = 30  # The used frame rate if the AI plays (the bigger, the faster it plays)
 FPS_HUMAN = 10  # The used frame rate if the human plays
-if AI:
+if AI_PLAYS:
     FPS = FPS_AI
 else:
     FPS = FPS_HUMAN

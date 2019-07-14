@@ -11,6 +11,7 @@
 ################################################################
 
 from src.constants import *
+from src.aiSettings import *
 
 import random
 import math
@@ -163,7 +164,7 @@ class DeepQNetwork(nn.Module):
         """
         Constructor of the Deep Q Network
         """
-        super.__init__()
+        super().__init__()
 
         self.layer = nn.Linear(in_features=COLUMNS * ROWS + 3, out_features=5)
 
@@ -221,7 +222,7 @@ class EpsilonGreedyStrategy(object):
     Represents the will of the AI to explore new strategies or to play from experience
     """
 
-    def __init__(self, start, end, decay):
+    def __init__(self, start=max_exploration_rate, end=min_exploration_rate, decay=exploration_decay_rate):
         """
         Constructor
 
