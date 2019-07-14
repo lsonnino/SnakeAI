@@ -3,12 +3,27 @@
 # Author: Lorenzo Sonnino
 # GitHub: https://github.com/lsonnino
 #
-# This file contains the AI
+# This file contains the AI.
+# Part of the code in this class is based on the DeepLizard
+# tutorial about Deep Q Networks:
+#     website: https://deeplizard.com
 #
 ################################################################
 
-import numpy as np
 from src.constants import *
+
+import random
+import math
+import numpy as np
+import torch
+import torch.nn as nn
+from collections import namedtuple
+
+# Defines the experiences as state, action, next state and reward
+Experience = namedtuple(
+    'Experience',  # Name of the tuple class
+    ('state', 'action', 'next_state', 'reward')  # Content of the tuple
+)
 
 
 def map_to_input(map):
@@ -102,5 +117,127 @@ def get_output(outputs):
 
 
 class AI(object):
+    """
+    Represents the agent that will perform the actions based on a strategy (for instance an Epsilon Greedy Strategy)
+    """
+
+    def __init__(self, strategy, num_actions):
+        """
+        Constructor
+
+        :param strategy: the strategy that will be used to choose whether to explore or not
+        :param num_actions: the number of possible actions
+        """
+        self.strategy = strategy
+        self.num_actions = num_actions
+        self.current_step = 0
+
+    def select_action(self, state, policy_network):
+        """
+        Selects an action to perform based on the strategy and the state
+
+        :param state: the current state
+        :param policy_network: the neural network that will be used if it chooses to act based on the experience
+        :return: a number between 0 and self.num_actions that represents the chosen action
+        """
+        # Get the will to explore
+        threshold = self.strategy.get_exploration_rate(self.current_step)
+        self.current_step += 1
+
+        if threshold > random.random():  # it chooses to explore
+            return random.randrange(self.num_actions)
+        else:  # it chooses to act on experience
+            with torch.no_grad():
+                return policy_network(state).argmax(dim=1).item()
+
+
+class DeepQNetwork(nn.Module):
+    """
+    Deep Q Network with one input layer and one output layer. Each neuron is connected
+        to all neurons of the next layer.
+
+        The input layer has COLUMNS * ROWS + 3 inputs and 5 outputs
+    """
+
     def __init__(self):
-        pass
+        """
+        Constructor of the Deep Q Network
+        """
+        super.__init__()
+
+        self.layer = nn.Linear(in_features=COLUMNS * ROWS + 3, out_features=5)
+
+    def forward(self, t):
+        t = t.flatten(start_dim=1)  # Flatten the tensor t
+
+        return self.layer(t)  # Pass the tensor to the network
+
+
+class ReplayMemory(object):
+    """
+    Contains all the past experiences that will be used to train the network
+    """
+
+    def __init__(self, capacity):
+        """
+        Constructor of the memory
+        :param capacity: the number of experiences that will be stored
+        """
+        self.capacity = capacity  # The number of experiences that can be stored
+        self.memory = []  # The experiences
+        self.push_count = 0  # How many experiences have been stored
+
+    def push(self, experience):
+        """
+        Add an experience to the memory
+        :param experience: the experience to add
+        """
+        if len(self.memory) < self.capacity:
+            self.memory.append(experience)
+        else:
+            self.memory[self.push_count % self.capacity] = experience
+
+        self.push_count += 1
+
+    def sample(self, batch_size):
+        """
+        Get a random sample of experiences from the memory
+        :param batch_size: the number of experiences that will be returned
+        :return: a random set of experiences
+        """
+        return random.sample(self.memory, batch_size)
+
+    def can_provide_sample(self, batch_size):
+        """
+        Get if there are enough experiences to complete a batch
+        :param batch_size: the number of experiences that needs to be stored
+        :return: True if it contains enough experiences, False otherwise
+        """
+        return len(self.memory) >= batch_size
+
+
+class EpsilonGreedyStrategy(object):
+    """
+    Represents the will of the AI to explore new strategies or to play from experience
+    """
+
+    def __init__(self, start, end, decay):
+        """
+        Constructor
+
+        :param start: the initial will to explore from 0 to 1
+        :param end: the final will to explore from 0 to 1
+        :param decay: the decay to pass from start to end from 0 to 1
+        """
+        self.start = start
+        self.end = end
+        self.decay = decay
+
+    def get_exploration_rate(self, current_step):
+        """
+        Get the will to explore
+
+        :param current_step: the current step
+        :return: the will from 0 to 1
+        """
+        return self.end + (self.start - self.end) * math.exp(-1 * current_step + self.decay)
