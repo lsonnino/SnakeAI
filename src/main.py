@@ -17,7 +17,6 @@
 ################################################################
 
 from src.objects import *
-from src.constants import *
 from src.ai import *
 
 # Start the game
@@ -78,11 +77,10 @@ while running:
             action = NONE
             if AI_PLAYS:
                 # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
-                # The possible actions variables are values between -1 and 4 so we need to subtract 1
                 action = ai.select_action(
                     torch.from_numpy(map_to_input(map)),
                     network
-                ) - 1
+                )
             else:
                 if keys[pygame.K_LEFT]:
                     action = LEFT

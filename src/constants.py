@@ -10,7 +10,7 @@
 
 # General Constants
 NAME = "SnakeAI"
-AI_PLAYS = True
+AI_PLAYS = False
 
 FONT = "Arial"
 FONT_SIZE = 20
@@ -41,8 +41,8 @@ EMPTY = 0
 FOOD = 1
 SNAKE = 2
 
-RIGHT = 0
-TOP = 1
-LEFT = 2
-BOTTOM = 3
-NONE = -1
+RIGHT = 1
+TOP = 2
+LEFT = 3
+BOTTOM = 4
+NONE = 0
