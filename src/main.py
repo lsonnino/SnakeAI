@@ -50,8 +50,6 @@ ai_generation = 1
 # Keeps the game running
 running = True
 while running:
-    # pygame.time.delay(FRAME_TIME)
-
     for event in pygame.event.get():
         # Check special events
         if event.type == pygame.QUIT: # Quit
@@ -61,15 +59,15 @@ while running:
         # Check pressed keys
         keys = pygame.key.get_pressed()
 
-        for key in keys:
-            if keys[pygame.K_ESCAPE]:
-                running = False
-                break
+        if keys[pygame.K_ESCAPE]:
+            running = False
+            break
 
-            if AI:
-                continue
-
-            elif keys[pygame.K_LEFT]:
+        # Take action
+        if AI:
+            pass
+        else:
+            if keys[pygame.K_LEFT]:
                 map.snake.direction = LEFT
             elif keys[pygame.K_RIGHT]:
                 map.snake.direction = RIGHT
