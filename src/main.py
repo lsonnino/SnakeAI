@@ -36,66 +36,79 @@ clock = pygame.time.Clock()
 # Get the font
 font = pygame.font.SysFont(FONT, FONT_SIZE)
 
-# Creates the map
-map = Map()
-map.spawn_food()
-
 # AI variables
 ai_generation = 1
+
+map = Map()
 
 # Keeps the game running
 running = True
 while running:
-    for event in pygame.event.get():
-        # Check special events
-        if event.type == pygame.QUIT:  # Quit
-            running = False
-            break
+    # Creates the map
+    map.__init__()
+    map.spawn_food()
 
-        # Check pressed keys
-        keys = pygame.key.get_pressed()
+    # Starts playing
+    playing = True
 
-        if keys[pygame.K_ESCAPE]:
-            running = False
-            break
+    while playing:
+        for event in pygame.event.get():
+            # Check special events
+            if event.type == pygame.QUIT:  # Quit
+                running = False
+                playing = False
+                break
 
-        # Take action
-        if AI:
+            # Check pressed keys
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_ESCAPE]:
+                running = False
+                playing = False
+                break
+
+            # Take action
+            if AI:
+                pass
+            else:
+                if keys[pygame.K_LEFT]:
+                    map.snake.direction = LEFT
+                elif keys[pygame.K_RIGHT]:
+                    map.snake.direction = RIGHT
+                elif keys[pygame.K_UP]:
+                    map.snake.direction = TOP
+                elif keys[pygame.K_DOWN]:
+                    map.snake.direction = BOTTOM
+
+        # Make the snake move
+        if map.snake.walk():
+            # The snake is still alive
             pass
         else:
-            if keys[pygame.K_LEFT]:
-                map.snake.direction = LEFT
-            elif keys[pygame.K_RIGHT]:
-                map.snake.direction = RIGHT
-            elif keys[pygame.K_UP]:
-                map.snake.direction = TOP
-            elif keys[pygame.K_DOWN]:
-                map.snake.direction = BOTTOM
+            # The snake died
+            playing = False
+            continue
 
-    # Make the snake move
-    if map.snake.walk():
-        # The snake is still alive
-        pass
-    else:
-        # The snake died
-        running = False
+        map.check_food()
 
-    map.check_food()
+        # Draw the components
+        map.draw(window)
 
-    # Draw the components
-    map.draw(window)
-
-    # Draw the texts
-    textsurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
-    # Merge the texts with the window
-    window.blit(textsurface, (10, 10))
-    if AI:
-        textsurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+        # Draw the texts
+        textsurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
         # Merge the texts with the window
-        window.blit(textsurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
+        window.blit(textsurface, (10, 10))
+        if AI:
+            textsurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+            # Merge the texts with the window
+            window.blit(textsurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
 
-    # Refresh the window
-    pygame.display.flip()
+        # Refresh the window
+        pygame.display.flip()
 
-    # Wait until next frame
-    clock.tick(FPS)
+        # Wait until next frame
+        clock.tick(FPS)
+
+    # Pass to next generation
+    if AI:
+        ai_generation += 1

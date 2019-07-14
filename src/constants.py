@@ -10,7 +10,7 @@
 
 # General Constants
 NAME = "SnakeAI"
-AI = True
+AI = False
 
 FONT = "Arial"
 FONT_SIZE = 20
