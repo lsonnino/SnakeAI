@@ -19,7 +19,6 @@
 from src.objects import *
 from src.constants import *
 
-
 # Start the game
 pygame.init()
 # Initialize the fonts
@@ -34,15 +33,12 @@ pygame.display.set_caption(NAME)
 # Setting up the clock
 clock = pygame.time.Clock()
 
-
 # Get the font
 font = pygame.font.SysFont(FONT, FONT_SIZE)
-
 
 # Creates the map
 map = Map()
 map.spawn_food()
-
 
 # AI variables
 ai_generation = 1
@@ -52,7 +48,7 @@ running = True
 while running:
     for event in pygame.event.get():
         # Check special events
-        if event.type == pygame.QUIT: # Quit
+        if event.type == pygame.QUIT:  # Quit
             running = False
             break
 

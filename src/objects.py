@@ -30,7 +30,7 @@ class Map(object):
         Instantiate the empty map with a newly created snake
         """
 
-        self.map = np.zeros((ROWS, COLUMNS), dtype=int)
+        self.map = np.zeros((COLUMNS, ROWS), dtype=int)
         self.snake = Snake()
 
     def draw(self, window):
@@ -40,8 +40,8 @@ class Map(object):
         """
 
         # Runs the map
-        for x in range(ROWS):
-            for y in range(COLUMNS):
+        for x in range(COLUMNS):
+            for y in range(ROWS):
                 # Chooses the color
                 color = colors[self.map[x, y]]
                 # Draws the rectangle
@@ -58,8 +58,8 @@ class Map(object):
         found = False
 
         while not found:
-            x = random.randint(0, ROWS - 1)
-            y = random.randint(0, COLUMNS - 1)
+            x = random.randint(0, COLUMNS - 1)
+            y = random.randint(0, ROWS - 1)
             if not self.snake.body.__contains__((x, y)):
                 self.map[x, y] = FOOD
                 found = True
@@ -91,8 +91,8 @@ class Snake(object):
         """
         Initializes a sized 1 snake at the center of the screen looking to the right
         """
-        self.x = int(ROWS / 2)
-        self.y = int(COLUMNS / 2)
+        self.x = int(COLUMNS / 2)
+        self.y = int(ROWS / 2)
         self.body = [(self.x, self.y)]
 
         self.direction = NONE
@@ -136,7 +136,7 @@ class Snake(object):
         if self.body.__contains__(new_head):
             return False
 
-        if new_head[0] < 0 or new_head[0] >= ROWS or new_head[1] < 0 or new_head[1] >= COLUMNS:
+        if new_head[0] < 0 or new_head[0] >= COLUMNS or new_head[1] < 0 or new_head[1] >= ROWS:
             return False
 
         # Move the head to new location

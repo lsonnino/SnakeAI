@@ -19,8 +19,8 @@ FONT_SIZE = 20
 WIN_SIZE = (500, 500)  # The size of the window
 ROWS = 20  # The number of rows
 COLUMNS = 20  # The number of columns
-CASE_WIDTH = WIN_SIZE[0] / ROWS
-CASE_HEIGHT = WIN_SIZE[1] / COLUMNS
+CASE_WIDTH = WIN_SIZE[0] / COLUMNS
+CASE_HEIGHT = WIN_SIZE[1] / ROWS
 
 FPS_AI = 30  # The used frame rate if the AI plays (the bigger, the faster it plays)
 FPS_HUMAN = 10  # The used frame rate if the human plays
