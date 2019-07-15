@@ -149,7 +149,8 @@ class AI(object):
             return random.randrange(self.num_actions)
         else:  # it chooses to act on experience
             with torch.no_grad():
-                return policy_network(state).argmax(dim=1).item()
+                # return policy_network(state).argmax(dim=1).item()
+                return policy_network(state).argmax().item()
 
 
 class DeepQNetwork(nn.Module):
@@ -169,7 +170,8 @@ class DeepQNetwork(nn.Module):
         self.layer = nn.Linear(in_features=COLUMNS * ROWS + 3, out_features=5)
 
     def forward(self, t):
-        t = t.flatten(start_dim=1)  # Flatten the tensor t
+        # t = t.flatten(start_dim=1)  # Flatten the tensor t
+        t = t.flatten()  # Flatten the tensor t
 
         return self.layer(t)  # Pass the tensor to the network
 

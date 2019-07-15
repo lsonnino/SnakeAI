@@ -78,7 +78,8 @@ while running:
             if AI_PLAYS:
                 # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
                 action = ai.select_action(
-                    torch.from_numpy(map_to_input(map)),
+                    torch.from_numpy(map_to_input(map)).float(),
+                    # torch.tensor(map_to_input(map)).float(),
                     network
                 )
             else:
