@@ -155,4 +155,7 @@ class Snake(object):
         Get the snake's score
         :return: An integer representing the snake's score
         """
+        if len(self.body) == 0:
+            return 0
+        
         return len(self.body) - 1
