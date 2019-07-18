@@ -42,14 +42,14 @@ if AI_PLAYS:
     network = DeepQNetwork()
     ai = AI(EpsilonGreedyStrategy(), 5)
 
-map = Map()
+map = Map(max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
 
 # Keeps the game running
 running = True
 gameNum = 0  # keeps track of the number of played games
 while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
     # Creates the map
-    map.__init__()
+    map.__init__(max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
     map.spawn_food()
 
     # Starts playing
@@ -104,6 +104,7 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
             continue
 
         if map.check_food():  # The snake got some food
+            map.snake.got_food()
             reward = 1
         else:
             reward = 0
@@ -134,6 +135,6 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
         ai_generation += 1
     else:
         # Printing score
-        print("Game score: " + map.snake.get_score())
+        print("Game score: " + str(map.snake.get_score()))
 
     gameNum += 1

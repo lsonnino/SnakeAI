@@ -25,13 +25,13 @@ def draw_case(window, color, x, y):
 
 
 class Map(object):
-    def __init__(self):
+    def __init__(self, max_moves=-1):
         """
         Instantiate the empty map with a newly created snake
         """
 
         self.map = np.zeros((COLUMNS, ROWS), dtype=int)
-        self.snake = Snake()
+        self.snake = Snake(max_moves)
 
     def draw(self, window):
         """
@@ -93,9 +93,12 @@ class Map(object):
 
 
 class Snake(object):
-    def __init__(self):
+    def __init__(self, max_moves=-1):
         """
         Initializes a sized 1 snake at the center of the screen looking to the right
+
+        :param max_moves: the maximum number of moves the snake is allowed to perform to get some food
+                before dying. -1 meens that there is no maximum.
         """
         self.x = int(COLUMNS / 2)
         self.y = int(ROWS / 2)
@@ -103,6 +106,9 @@ class Snake(object):
 
         self.direction = NONE
         self.took_food = False
+
+        self.max_moves = max_moves
+        self.moves_left = self.max_moves
 
     def draw(self, window):
         """
@@ -131,6 +137,14 @@ class Snake(object):
         else:
             return True
 
+        # Check the moves left
+        if self.max_moves > 0:
+            self.moves_left -= 1
+
+            # If the snake has no more moves left
+            if self.moves_left <= 0:
+                return False
+
         if self.took_food:  # If the snake just took some food
             # Do not remove the last piece of the tail this turn
             self.took_food = False
@@ -150,6 +164,9 @@ class Snake(object):
 
         return True
 
+    def got_food(self):
+        self.moves_left = self.max_moves
+
     def get_score(self):
         """
         Get the snake's score
@@ -157,5 +174,5 @@ class Snake(object):
         """
         if len(self.body) == 0:
             return 0
-        
+
         return len(self.body) - 1

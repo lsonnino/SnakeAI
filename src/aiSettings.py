@@ -17,3 +17,8 @@ learning_rate = 0.5  # must be between 0 and 1
 max_exploration_rate = 1  # must be between 0 and 1
 min_exploration_rate = 0.1  # must be between 0 and 1
 exploration_decay_rate = 0.001  # must be between 0 and 1
+
+
+# The maximum number the AI is allowed to make to get some food. If he gets
+# food, he survives and reset its number. It dies otherwise.
+AI_MAX_ALLOWED_MOVES = 300  # must be less than 0 if infinite number of moves, greater than 0 otherwise
