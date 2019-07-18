@@ -11,6 +11,7 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
+NUMBER_OF_GAMES = -1  # -1 to play infinite games
 
 FONT = "Arial"
 FONT_SIZE = 20

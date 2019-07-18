@@ -46,7 +46,8 @@ map = Map()
 
 # Keeps the game running
 running = True
-while running:
+gameNum = 0  # keeps track of the number of played games
+while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
     # Creates the map
     map.__init__()
     map.spawn_food()
@@ -102,7 +103,7 @@ while running:
             reward = -1
             continue
 
-        if map.check_food():
+        if map.check_food():  # The snake got some food
             reward = 1
         else:
             reward = 0
@@ -111,13 +112,13 @@ while running:
         map.draw(window)
 
         # Draw the texts
-        textsurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
+        textSurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
         # Merge the texts with the window
-        window.blit(textsurface, (10, 10))
+        window.blit(textSurface, (10, 10))
         if AI_PLAYS:
-            textsurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+            textSurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
             # Merge the texts with the window
-            window.blit(textsurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
+            window.blit(textSurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
 
         # Refresh the window
         pygame.display.flip()
@@ -127,4 +128,12 @@ while running:
 
     # Pass to next generation
     if AI_PLAYS:
+        # Printing score
+        print("AI score for gen " + str(ai_generation) + ": " + str(map.snake.get_score()))
+
         ai_generation += 1
+    else:
+        # Printing score
+        print("Game score: " + map.snake.get_score())
+
+    gameNum += 1
