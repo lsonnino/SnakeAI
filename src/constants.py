@@ -10,15 +10,15 @@
 
 # General Constants
 NAME = "SnakeAI"
-AI_PLAYS = True
+AI_PLAYS = False
 
 FONT = "Arial"
 FONT_SIZE = 20
 
 # World constants
-WIN_SIZE = (500, 500)  # The size of the window
-ROWS = 20  # The number of rows
-COLUMNS = 20  # The number of columns
+WIN_SIZE = (750, 750)  # The size of the window
+ROWS = 30  # The number of rows
+COLUMNS = 30  # The number of columns
 CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 

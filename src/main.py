@@ -65,36 +65,35 @@ while running:
                 playing = False
                 break
 
-            # Check pressed keys
-            keys = pygame.key.get_pressed()
+        # Check pressed keys
+        keys = pygame.key.get_pressed()
 
-            if keys[pygame.K_ESCAPE]:
-                running = False
-                playing = False
-                break
+        if keys[pygame.K_ESCAPE]:
+            running = False
+            playing = False
+            break
 
-            # Get action
-            action = NONE
-            if AI_PLAYS:
-                # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
-                action = ai.select_action(
-                    torch.from_numpy(map_to_input(map)).float(),
-                    # torch.tensor(map_to_input(map)).float(),
-                    network
-                )
-            else:
-                if keys[pygame.K_LEFT]:
-                    action = LEFT
-                elif keys[pygame.K_RIGHT]:
-                    action = RIGHT
-                elif keys[pygame.K_UP]:
-                    action = TOP
-                elif keys[pygame.K_DOWN]:
-                    action = BOTTOM
+        # Get action
+        action = NONE
+        if AI_PLAYS:
+            # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
+            action = ai.select_action(
+                torch.from_numpy(map_to_input(map)).float(),
+                network
+            )
+        else:
+            if keys[pygame.K_LEFT]:
+                action = LEFT
+            elif keys[pygame.K_RIGHT]:
+                action = RIGHT
+            elif keys[pygame.K_UP]:
+                action = TOP
+            elif keys[pygame.K_DOWN]:
+                action = BOTTOM
 
-            # Perform action
-            if action != NONE:
-                map.snake.direction = action
+        # Perform action
+        if action != NONE:
+            map.snake.direction = action
 
         # Make the snake's move
         if not map.snake.walk():
