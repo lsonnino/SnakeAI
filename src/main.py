@@ -115,13 +115,13 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
         map.draw(window)
 
         # Draw the texts
-        textSurface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
+        text_surface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
         # Merge the texts with the window
-        window.blit(textSurface, (10, 10))
+        window.blit(text_surface, (10, 10))
         if AI_PLAYS:
-            textSurface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+            text_surface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
             # Merge the texts with the window
-            window.blit(textSurface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
+            window.blit(text_surface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
 
         # Refresh the window
         pygame.display.flip()

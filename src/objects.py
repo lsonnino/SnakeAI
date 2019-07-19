@@ -42,10 +42,11 @@ class Map(object):
         # Runs the map
         for x in range(COLUMNS):
             for y in range(ROWS):
-                # Chooses the color
-                color = colors[self.map[x, y]]
-                # Draws the rectangle
-                draw_case(window, color, x, y)
+                if self.map[x, y] != EMPTY:
+                    # Chooses the color
+                    color = colors[self.map[x, y]]
+                    # Draws the rectangle
+                    draw_case(window, color, x, y)
 
         # Draws the snake
         self.snake.draw(window)
