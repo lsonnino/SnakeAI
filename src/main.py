@@ -74,6 +74,8 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
             playing = False
             break
 
+        window.fill(EMPTY_COLOR)
+
         # Get action
         action = NONE
         if AI_PLAYS:
