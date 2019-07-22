@@ -1,3 +1,12 @@
+################################################################
+#
+# Author: Lorenzo Sonnino
+# GitHub: https://github.com/lsonnino
+#
+# This file contains the game himself
+#
+################################################################
+
 from src.objects import *
 from src.ai import *
 
@@ -68,6 +77,10 @@ class Game(object):
         """
         return self.map.snake.get_score()
 
+
+# ============================
+# = Players
+# ============================
 
 class HumanPlayer:
     def __init__(self):

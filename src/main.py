@@ -5,11 +5,13 @@
 #
 # The project:
 #     The goal of this project is to make an AI that learns to play snake
+#     using reinforcement learning -- by giving him a reward whenever he
+#     does something good and by punishing him when he does something bad.
 #
 # Requirements:
-#     * PyGame: to display and play snake
-#     * TensorFlow: manages the AI
-#     * Numpy: used to manage matrix
+#     * PyGame     : to display and play snake
+#     * TensorFlow : manages the AI
+#     * Numpy      : used to manage matrix
 #
 # This file is the main file -- this is the file that runs the game
 # (the constants file indicates whether the AI plays or not)
