@@ -29,7 +29,7 @@ class Map(object):
         """
         Instantiate the empty map with a newly created snake
         :param max_moves: the maximum number of moves the snake is allowed to perform to get some food
-                before dying. -1 meens that there is no maximum.
+                before dying. -1 means that there is no maximum.
         """
 
         self.map = np.zeros((COLUMNS, ROWS), dtype=int)
@@ -101,7 +101,7 @@ class Snake(object):
         Initializes a sized 1 snake at the center of the screen looking to the right
 
         :param max_moves: the maximum number of moves the snake is allowed to perform to get some food
-                before dying. -1 meens that there is no maximum.
+                before dying. -1 means that there is no maximum.
         """
         self.x = int(COLUMNS / 2)
         self.y = int(ROWS / 2)

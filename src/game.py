@@ -9,7 +9,7 @@ class Game(object):
         :param player: the player
         :param device: where to perform calculations
         :param max_moves: the maximum number of moves the snake is allowed to perform to get some food
-                before dying. -1 meens that there is no maximum.
+                before dying. -1 means that there is no maximum.
         """
         self.max_moves = max_moves
         self.device = device
