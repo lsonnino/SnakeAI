@@ -31,7 +31,7 @@ def map_to_input(map):
     """
     Get the input value as they will be given to the AI
     The input is an array of size COLUMNS * ROWS + 3 where the first COLUMNS * ROWS values
-    represents the map. For each input, the value is 2 if the snake is at that position, 1 if there is food and
+    represents the map. For each input, the value is -1 if the snake is at that position, 1 if there is food and
     0 otherwise.
     The last three inputs are the snake's head position and the direction the snake is looking at.
 
@@ -52,7 +52,7 @@ def map_to_input(map):
 
     # Add the snake
     for piece in map.snake.body:
-        inputs[piece[0] * COLUMNS + piece[1]] = 2
+        inputs[piece[0] * COLUMNS + piece[1]] = -1
 
     # Add the head's position
     head_x, head_y = get_head_position(map.snake)
@@ -122,16 +122,18 @@ class AI(object):
     Represents the agent that will perform the actions based on a strategy (for instance an Epsilon Greedy Strategy)
     """
 
-    def __init__(self, strategy, num_actions):
+    def __init__(self, strategy, num_actions, device):
         """
         Constructor
 
         :param strategy: the strategy that will be used to choose whether to explore or not
         :param num_actions: the number of possible actions
+        :param device: the device to use for calculations
         """
         self.strategy = strategy
         self.num_actions = num_actions
         self.current_step = 0
+        self.device = device
 
     def select_action(self, state, policy_network):
         """
@@ -146,11 +148,14 @@ class AI(object):
         self.current_step += 1
 
         if threshold > random.random():  # it chooses to explore
-            return random.randrange(self.num_actions)
+            # return random.randrange(self.num_actions)
+            action = random.randrange(self.num_actions)
+            return torch.tensor([action]).to(self.device)
         else:  # it chooses to act on experience
             with torch.no_grad():
                 # return policy_network(state).argmax(dim=1).item()
-                return policy_network(state).argmax().item()
+                # return policy_network(state).argmax().item()
+                return policy_network(state).argmax().to(self.device)
 
 
 class DeepQNetwork(nn.Module):

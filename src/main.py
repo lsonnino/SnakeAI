@@ -40,7 +40,7 @@ font = pygame.font.SysFont(FONT, FONT_SIZE)
 if AI_PLAYS:
     ai_generation = 1
     network = DeepQNetwork()
-    ai = AI(EpsilonGreedyStrategy(), 5)
+    ai = AI(EpsilonGreedyStrategy(), 5, DEVICE)
 
 map = Map(max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
 
@@ -56,7 +56,7 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
     playing = True
 
     # initialize reward
-    reward = 0
+    reward_val = 0
 
     while playing:
         for event in pygame.event.get():
@@ -102,14 +102,16 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
         if not map.snake.walk():
             # The snake died
             playing = False
-            reward = -1
+            reward_val = -1
             continue
 
         if map.check_food():  # The snake got some food
             map.snake.got_food()
-            reward = 1
+            reward_val = 1
         else:
-            reward = 0
+            reward_val = 0
+
+        reward = torch.tensor([reward_val], device=DEVICE)
 
         # Draw the components
         map.draw(window)
