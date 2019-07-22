@@ -16,8 +16,7 @@
 #
 ################################################################
 
-from src.objects import *
-from src.ai import *
+from src.game import *
 
 # Start the game
 pygame.init()
@@ -39,26 +38,21 @@ font = pygame.font.SysFont(FONT, FONT_SIZE)
 # setup AI
 if AI_PLAYS:
     ai_generation = 1
-    network = DeepQNetwork()
-    ai = AI(EpsilonGreedyStrategy(), 5, DEVICE)
+    player = AIPlayer(DEVICE)
+else:
+    player = HumanPlayer()
 
-map = Map(max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
+# Create the game
+game = Game(player, DEVICE, max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
 
 # Keeps the game running
 running = True
 gameNum = 0  # keeps track of the number of played games
 while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
-    # Creates the map
-    map.__init__(max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1))
-    map.spawn_food()
+    # Reset the game
+    game.reset()
 
-    # Starts playing
-    playing = True
-
-    # initialize reward
-    reward_val = 0
-
-    while playing:
+    while game.playing:
         for event in pygame.event.get():
             # Check special events
             if event.type == pygame.QUIT:  # Quit
@@ -74,50 +68,14 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
             playing = False
             break
 
-        window.fill(EMPTY_COLOR)
-
-        # Get action
-        action = NONE
-        if AI_PLAYS:
-            # The ai returns a number between 0 and 5 (from NONE to BOTTOM as described in the constants)
-            action = ai.select_action(
-                torch.from_numpy(map_to_input(map)).float(),
-                network
-            )
-        else:
-            if keys[pygame.K_LEFT]:
-                action = LEFT
-            elif keys[pygame.K_RIGHT]:
-                action = RIGHT
-            elif keys[pygame.K_UP]:
-                action = TOP
-            elif keys[pygame.K_DOWN]:
-                action = BOTTOM
-
-        # Perform action
-        if action != NONE:
-            map.snake.direction = action
-
-        # Make the snake's move
-        if not map.snake.walk():
-            # The snake died
-            playing = False
-            reward_val = -1
-            continue
-
-        if map.check_food():  # The snake got some food
-            map.snake.got_food()
-            reward_val = 1
-        else:
-            reward_val = 0
-
-        reward = torch.tensor([reward_val], device=DEVICE)
+        # Make a step in the game
+        reward = game.step()
 
         # Draw the components
-        map.draw(window)
+        game.draw(window)
 
         # Draw the texts
-        text_surface = font.render("Score: " + str(map.snake.get_score()), False, TEXT_COLOR)
+        text_surface = font.render("Score: " + str(game.get_score()), False, TEXT_COLOR)
         # Merge the texts with the window
         window.blit(text_surface, (10, 10))
         if AI_PLAYS:
@@ -134,11 +92,11 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
     # Pass to next generation
     if AI_PLAYS:
         # Printing score
-        print("AI score for gen " + str(ai_generation) + ": " + str(map.snake.get_score()))
+        print("AI score for gen " + str(ai_generation) + ": " + str(game.get_score()))
 
         ai_generation += 1
     else:
         # Printing score
-        print("Game score: " + str(map.snake.get_score()))
+        print("Game score: " + str(game.get_score()))
 
     gameNum += 1
