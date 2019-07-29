@@ -11,7 +11,12 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
-NUMBER_OF_GAMES = -1  # -1 to play infinite games
+NUMBER_OF_GAMES = 1000  # -1 to play infinite games
+SAVE_EVERY = 10  # Must be greater than 0
+LOAD_NUMBER = -1  # -1 to start from the beginning
+DATA_DIR = "data"
+EXTENSION = "snake"
+GRAPHICS = False
 
 FONT = "Arial"
 FONT_SIZE = 20
@@ -23,7 +28,7 @@ COLUMNS = 38  # The number of columns
 CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 
-FPS_AI = 30  # The used frame rate if the AI plays (the bigger, the faster it plays)
+FPS_AI = 120  # The used frame rate if the AI plays (the bigger, the faster it plays)
 FPS_HUMAN = 10  # The used frame rate if the human plays
 if AI_PLAYS:
     FPS = FPS_AI

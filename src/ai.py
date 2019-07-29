@@ -117,23 +117,32 @@ def get_output(outputs):
         return NONE
 
 
+def extract_tensors(experiences):
+    batch = Experience(*zip(*experiences))
+
+    t1 = torch.cat(batch.state)
+    t2 = torch.cat(batch.action)
+    t3 = torch.cat(batch.reward)
+    t4 = torch.cat(batch.next_state)
+
+    return t1, t2, t3, t4
+
+
 class AI(object):
     """
     Represents the agent that will perform the actions based on a strategy (for instance an Epsilon Greedy Strategy)
     """
 
-    def __init__(self, strategy, num_actions, device):
+    def __init__(self, strategy, num_actions):
         """
         Constructor
 
         :param strategy: the strategy that will be used to choose whether to explore or not
         :param num_actions: the number of possible actions
-        :param device: the device to use for calculations
         """
         self.strategy = strategy
         self.num_actions = num_actions
         self.current_step = 0
-        self.device = device
 
     def select_action(self, state, policy_network):
         """
@@ -150,12 +159,47 @@ class AI(object):
         if threshold > random.random():  # it chooses to explore
             # return random.randrange(self.num_actions)
             action = random.randrange(self.num_actions)
-            return torch.tensor([action]).to(self.device)
+            return torch.tensor([action]).to(DEVICE)
         else:  # it chooses to act on experience
             with torch.no_grad():
-                # return policy_network(state).argmax(dim=1).item()
-                # return policy_network(state).argmax().item()
-                return policy_network(state).argmax().to(self.device)
+                # return policy_network(state).argmax(dim=1).to(DEVICE).item()
+                return policy_network(state).argmax().to(DEVICE).item()
+                # return policy_network(state).argmax().to(DEVICE)
+
+    def calculate_loss(self, batch, neural_network, target_network):
+        """
+        Calculate MSE between actual state action values,
+        and expected state action values from DQN
+        """
+        states, actions, rewards, dones, next_states = batch
+
+        states_v = torch.from_numpy(states).float()
+        next_states_v = torch.from_numpy(next_states).float()
+        actions_v = torch.tensor(actions).to(DEVICE)
+        rewards_v = torch.tensor(rewards).to(DEVICE)
+        done = torch.ByteTensor(dones).to(DEVICE)
+
+        # state_action_values = neural_network(states_v).gather(1, actions_v.long().unsqueeze(-1)).squeeze(-1)
+        state_action_values = neural_network(states_v)
+        # next_state_values = target_network(next_states_v).max(1)[0]
+        next_state_values = target_network(next_states_v)
+        # next_state_values[done] = 0.0
+        next_state_values = next_state_values.detach()
+
+        expected_state_action_values = next_state_values * discount_rate + rewards_v
+        return nn.MSELoss()(state_action_values, expected_state_action_values)
+
+    def train(self, neural_network, replay_memory, target_network, optimizer):
+        if not replay_memory.can_provide_sample(batch_size):
+            return
+
+        batch = replay_memory.sample(batch_size)
+
+        for b in batch:
+            optimizer.zero_grad()
+            loss_t = self.calculate_loss(b, neural_network, target_network)
+            loss_t.backward()
+            optimizer.step()
 
 
 class DeepQNetwork(nn.Module):
@@ -248,4 +292,25 @@ class EpsilonGreedyStrategy(object):
         :param current_step: the current step
         :return: the will from 0 to 1
         """
-        return self.end + (self.start - self.end) * math.exp(-1 * current_step + self.decay)
+        return self.end + (self.start - self.end) * math.exp(-1 * current_step * self.decay)
+
+
+class QValues():
+    @staticmethod
+    def get_current(policy_network, states, actions):
+        # return policy_network(states).gather(dim=1, index=actions.unsqueeze(-1))
+        return policy_network(states).gather(index=actions.unsqueeze(-1))
+
+    @staticmethod
+    def get_next(target_network, next_states):
+        final_state_locations = next_states.flatten(start_dim=1).max(dim=1)[0].eq(0).type(torch.bool)
+
+        non_final_state_locations = (final_state_locations == False)
+        non_final_states = next_states[non_final_state_locations]
+        # non_final_state_locations = [True] * len(next_states)
+        # non_final_states = next_states
+
+        batch_size = next_states.shape[0]
+        values = torch.zeros(batch_size).to(DEVICE)
+        values[non_final_state_locations] = target_network(non_final_states).max(dim=1)[0].detach()
+        return values
