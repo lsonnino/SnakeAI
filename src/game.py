@@ -11,10 +11,43 @@ import os
 import pickle
 
 from torch import optim
-import torch.nn.functional as F
 
 from src.objects import *
 from src.ai import *
+
+
+def map_to_state(map):
+    state = np.zeros( (COLUMNS, ROWS) )
+
+    # Runs the map
+    for x in range(COLUMNS):
+        for y in range(ROWS):
+            if map.map[x, y] == FOOD:
+                value = 1
+            else:
+                value = 0
+
+            state[x, y] = value
+
+    # Add the snake
+    for piece in map.snake.body:
+        state[piece[0], piece[1]] = -1
+
+    return state
+
+
+def get_empty_state():
+    return np.zeros( (COLUMNS, ROWS) )
+
+
+def merge_states(new, previous):
+    merged = np.zeros( (COLUMNS, ROWS, 2) )
+
+    for x in range(COLUMNS):
+        for y in range(ROWS):
+            merged[x, y] = [new[x, y], previous[x, y]]
+
+    return merged
 
 
 class Game(object):
@@ -29,8 +62,10 @@ class Game(object):
         self.player = player
         self.map = Map(max_moves=max_moves)
         self.map.spawn_food()
+        self.prev_state = get_empty_state()
 
         self.playing = True
+        self.starting = True
 
     def reset(self):
         """
@@ -39,7 +74,10 @@ class Game(object):
         self.map.__init__(max_moves=self.max_moves)
         self.map.spawn_food()
 
+        self.prev_state = get_empty_state()
+
         self.playing = True
+        self.starting = True
 
     def step(self):
         """
@@ -49,9 +87,11 @@ class Game(object):
         reward_val = 0
 
         # Get the player's action
-        action = self.player.get_action(self.map)
-        if action != NONE:
-            self.map.snake.direction = action
+        action = self.player.get_action(self.get_state())
+        if action.item() != NONE:
+            self.map.snake.direction = action.item()
+
+        self.prev_state = map_to_state(self.map)
 
         # Make the snake's move and check result
         if not self.map.snake.walk():
@@ -62,9 +102,18 @@ class Game(object):
             self.map.snake.got_food()
             reward_val = 1
 
+        if self.starting:
+            self.starting = False
+
         # Return the reward
         return torch.tensor([action], device=DEVICE), torch.tensor([reward_val], device=DEVICE)
         # return action, reward_val
+
+    def get_state(self):
+        if self.playing or self.starting:
+            return merge_states(map_to_state(self.map), self.prev_state)
+        else:
+            return np.zeros( (COLUMNS, ROWS, 2) )
 
     def train(self):
         self.player.train()
@@ -137,22 +186,18 @@ class AIPlayer:
 
         self.optimizer = optim.Adam(params=self.network.parameters(), lr=learning_rate)
 
-    def get_action(self, map):
+    def get_action(self, state):
         return self.ai.select_action(
-            torch.from_numpy(map_to_input(map)).float(),
+            torch.from_numpy(state).float(),
             self.network
         )
 
     def train(self):
-        # if self.ai.current_step % update_frequency == 0:
-        #     self.target_network.load_state_dict(self.network.state_dict())
-
-        # self.ai.train(self.network, self.memory, self.target_network, self.optimizer)
         if not self.memory.can_provide_sample(batch_size):
             return
 
         experiences = self.memory.sample(batch_size)
-        states, actions, rewards, next_states = extract_tensors(experiences)
+        states, actions, next_states, rewards = extract_tensors(experiences)
 
         current_q_values = QValues.get_current(self.network, states, actions)
         next_q_values = QValues.get_next(self.target_network, next_states)
@@ -167,8 +212,8 @@ class AIPlayer:
         self.memory.push(Experience(
             torch.from_numpy(state).float(),
             action,
-            reward,
-            torch.from_numpy(next_state).float()
+            torch.from_numpy(next_state).float(),
+            reward
         ))
 
     def next_episode(self, number):

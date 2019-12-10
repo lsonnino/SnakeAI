@@ -20,7 +20,7 @@ min_exploration_rate = 0.01  # must be between 0 and 1
 exploration_decay_rate = 0.00005  # must be between 0 and 1
 
 # The number of experiences the AI will use to train after each step
-batch_size = 256  # must be greater than 1
+batch_size = 3#256  # must be greater than 1
 # The number of elements that can be contained in the memory
 replay_memory_capacity = 2048  # must be greater than 1
 # The number of times the AI will train before updating his semi-constant network

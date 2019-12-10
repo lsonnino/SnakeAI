@@ -66,7 +66,7 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
 
     # Reset the game
     game.reset()
-    state = map_to_input(game.map)
+    state = game.get_state()
 
     while game.playing:
         if GRAPHICS:
@@ -89,8 +89,7 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
         action, reward = game.step()
 
         # Train the player
-        # next_state = map_to_input(game.map) if game.playing else state
-        next_state = map_to_input(game.map) if game.playing else np.zeros(len(state))
+        next_state = game.get_state()
         game.set_result(state, action, reward, next_state)
         game.train()
         state = next_state

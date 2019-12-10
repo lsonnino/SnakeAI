@@ -23,8 +23,8 @@ FONT_SIZE = 20
 
 # World constants
 WIN_SIZE = (760, 760)  # The size of the window
-ROWS = 38  # The number of rows
-COLUMNS = 38  # The number of columns
+ROWS = 2#38  # The number of rows
+COLUMNS = 2#38  # The number of columns
 CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 

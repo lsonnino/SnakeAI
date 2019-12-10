@@ -15,7 +15,6 @@ from src.aiSettings import *
 
 import random
 import math
-import numpy as np
 import torch
 import torch.nn as nn
 from collections import namedtuple
@@ -25,56 +24,6 @@ Experience = namedtuple(
     'Experience',  # Name of the tuple class
     ('state', 'action', 'next_state', 'reward')  # Content of the tuple
 )
-
-
-def map_to_input(map):
-    """
-    Get the input value as they will be given to the AI
-    The input is an array of size COLUMNS * ROWS + 3 where the first COLUMNS * ROWS values
-    represents the map. For each input, the value is -1 if the snake is at that position, 1 if there is food and
-    0 otherwise.
-    The last three inputs are the snake's head position and the direction the snake is looking at.
-
-    :param map: the current state of the map the AI is playing
-    :return: the input value as they will be given to the AI
-    """
-    inputs = np.zeros(COLUMNS * ROWS + 3)
-
-    # Runs the map
-    for x in range(COLUMNS):
-        for y in range(ROWS):
-            if map.map[x, y] == FOOD:
-                value = 1
-            else:
-                value = 0
-
-            inputs[x * COLUMNS + y] = value
-
-    # Add the snake
-    for piece in map.snake.body:
-        inputs[piece[0] * COLUMNS + piece[1]] = -1
-
-    # Add the head's position
-    head_x, head_y = get_head_position(map.snake)
-    inputs[COLUMNS * ROWS] = head_x
-    inputs[COLUMNS * ROWS + 1] = head_y
-
-    inputs[COLUMNS * ROWS + 2] = map.snake.direction
-
-    return inputs
-
-
-def get_head_position(snake):
-    """
-    Get the snake's head position
-
-    :param map: the snake the AI is playing
-    :return: a tuple containing first the x position then the y position
-    """
-    x = snake.body[0][0]
-    y = snake.body[0][1]
-
-    return x, y
 
 
 def get_output(outputs):
@@ -122,8 +71,8 @@ def extract_tensors(experiences):
 
     t1 = torch.cat(batch.state)
     t2 = torch.cat(batch.action)
-    t3 = torch.cat(batch.reward)
-    t4 = torch.cat(batch.next_state)
+    t3 = torch.cat(batch.next_state)
+    t4 = torch.cat(batch.reward)
 
     return t1, t2, t3, t4
 
@@ -157,19 +106,17 @@ class AI(object):
         self.current_step += 1
 
         if threshold > random.random():  # it chooses to explore
-            # return random.randrange(self.num_actions)
             action = random.randrange(self.num_actions)
             return torch.tensor([action]).to(DEVICE)
         else:  # it chooses to act on experience
             with torch.no_grad():
-                # return policy_network(state).argmax(dim=1).to(DEVICE).item()
-                return policy_network(state).argmax().to(DEVICE).item()
-                # return policy_network(state).argmax().to(DEVICE)
+                return policy_network(state).argmax(dim=0).to(DEVICE)
 
-    def calculate_loss(self, batch, neural_network, target_network):
+    # def calculate_loss(self, batch, neural_network, target_network):
         """
         Calculate MSE between actual state action values,
         and expected state action values from DQN
+        """
         """
         states, actions, rewards, dones, next_states = batch
 
@@ -179,10 +126,10 @@ class AI(object):
         rewards_v = torch.tensor(rewards).to(DEVICE)
         done = torch.ByteTensor(dones).to(DEVICE)
 
-        # state_action_values = neural_network(states_v).gather(1, actions_v.long().unsqueeze(-1)).squeeze(-1)
-        state_action_values = neural_network(states_v)
-        # next_state_values = target_network(next_states_v).max(1)[0]
-        next_state_values = target_network(next_states_v)
+        state_action_values = neural_network(states_v).gather(1, actions_v.long().unsqueeze(-1)).squeeze(-1)
+        # state_action_values = neural_network(states_v)
+        next_state_values = target_network(next_states_v).max(1)[0]
+        # next_state_values = target_network(next_states_v)
         # next_state_values[done] = 0.0
         next_state_values = next_state_values.detach()
 
@@ -200,6 +147,7 @@ class AI(object):
             loss_t = self.calculate_loss(b, neural_network, target_network)
             loss_t.backward()
             optimizer.step()
+    """
 
 
 class DeepQNetwork(nn.Module):
@@ -216,13 +164,17 @@ class DeepQNetwork(nn.Module):
         """
         super().__init__()
 
-        self.layer = nn.Linear(in_features=COLUMNS * ROWS + 3, out_features=5)
+        self.layer1 = nn.Linear(in_features=COLUMNS * ROWS * 2, out_features=COLUMNS * ROWS)
+        self.layer2 = nn.Linear(in_features=COLUMNS * ROWS, out_features=5)
 
     def forward(self, t):
-        # t = t.flatten(start_dim=1)  # Flatten the tensor t
-        t = t.flatten()  # Flatten the tensor t
+        t = t.flatten(start_dim=0)
 
-        return self.layer(t)  # Pass the tensor to the network
+        # t = F.relu(self.layer1(t))
+        t = self.layer1(t)
+        t = self.layer2(t)
+
+        return t
 
 
 class ReplayMemory(object):
@@ -298,8 +250,13 @@ class EpsilonGreedyStrategy(object):
 class QValues():
     @staticmethod
     def get_current(policy_network, states, actions):
-        # return policy_network(states).gather(dim=1, index=actions.unsqueeze(-1))
-        return policy_network(states).gather(index=actions.unsqueeze(-1))
+        return policy_network(states).gather(dim=1, index=actions.unsqueeze(-1))
+        # q_values = []
+        # for s in states:
+        #     q_values.append(policy_network(s))
+        # return q_values.gather(dim=1, index=actions.unsqueeze(-1))
+        # return q_values
+
 
     @staticmethod
     def get_next(target_network, next_states):
@@ -307,8 +264,6 @@ class QValues():
 
         non_final_state_locations = (final_state_locations == False)
         non_final_states = next_states[non_final_state_locations]
-        # non_final_state_locations = [True] * len(next_states)
-        # non_final_states = next_states
 
         batch_size = next_states.shape[0]
         values = torch.zeros(batch_size).to(DEVICE)
