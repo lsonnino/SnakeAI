@@ -40,44 +40,18 @@ def get_output(outputs):
     else:  # None
         return NONE
 
-
-class NeuralNetwork(tf.keras.Model):
-    def __init__(self):
-        super(NeuralNetwork, self).__init__()
-
-        # Input layer
-        self.input_layer = tf.keras.layers.InputLayer(input_shape=(COLUMNS * ROWS * 2,))
-
-        # Hidden layers
-        self.hidden_layers = [0]
-        self.hidden_layers[0] = tf.keras.layers.Dense(COLUMNS * ROWS, activation='tanh', kernel_initializer='RandomNormal')
-
-        # Output layer
-        self.number_of_actions = 5
-        self.output_layer = tf.keras.layers.Dense(self.number_of_actions, activation='linear',
-                                                  kernel_initializer='RandomNormal')
-
-    @tf.function
-    def call(self, inputs):
-        # Input layer
-        z = self.input_layer(inputs)
-
-        # Hidden layers
-        for layer in self.hidden_layers:
-            z = layer(z)
-
-        # Output layer
-        output = self.output_layer(z)
-
-        return output
-
-
 class AI:
     def __init__(self):
         self.batch_size = batch_size
         self.optimizer = optimizers.Adam(learning_rate)
         self.gamma = discount_rate
-        self.model = NeuralNetwork()
+        self.number_of_actions = 5
+
+        inputs = tf.keras.Input(shape=(COLUMNS * ROWS * 2,), name='input')
+        x = tf.keras.layers.Dense(COLUMNS * ROWS, activation='tanh', name='hidden_layer')(inputs)
+        outputs = tf.keras.layers.Dense(self.number_of_actions, activation='linear', name='output')(x)
+        self.model = tf.keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
+
         self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
         self.max_experiences = replay_memory_capacity
         self.min_experiences = batch_size
@@ -122,8 +96,8 @@ class AI:
     def get_action(self, states, epsilon):
         if np.random.random() < epsilon:
             # Try something new
-            rnd = np.random.choice(self.model.number_of_actions)
-            output = np.zeros(self.model.number_of_actions)
+            rnd = np.random.choice(self.number_of_actions)
+            output = np.zeros(self.number_of_actions)
             output[int(rnd)] = 1
             return get_output(output)
         else:
@@ -146,9 +120,11 @@ class AI:
         """
         Make this NN the same as {@code TrainNet}
         """
+        '''
         variables1 = self.model.trainable_variables
         variables2 = TrainNet.model.trainable_variables
 
         for v1, v2 in zip(variables1, variables2):
             v1.assign(v2.numpy())
-
+        '''
+        self.model = tf.keras.models.clone_model(TrainNet.model)

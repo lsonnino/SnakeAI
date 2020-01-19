@@ -15,7 +15,7 @@ from src.ai import *
 
 
 def map_to_state(map):
-    state = np.zeros( (COLUMNS, ROWS) )
+    state = np.zeros(COLUMNS * ROWS)
 
     # Runs the map
     for x in range(COLUMNS):
@@ -25,31 +25,35 @@ def map_to_state(map):
             else:
                 value = 0
 
-            state[x, y] = value
+            state[x * ROWS + y] = value
 
     # Add the snake
     for piece in map.snake.body:
-        state[piece[0], piece[1]] = -1
+        state[piece[0]* ROWS + piece[1]] = -1
 
     return state
 
 
 def get_empty_state():
-    return np.zeros( (COLUMNS, ROWS) )
+    return np.zeros(COLUMNS * ROWS)
 
 
 def merge_states(new, previous):
+    '''
     merged = np.zeros( (COLUMNS, ROWS, 2) )
 
     for x in range(COLUMNS):
         for y in range(ROWS):
             merged[x, y] = [new[x, y], previous[x, y]]
+    '''
+
+    merged = np.concatenate((previous, new))
 
     return merged
 
 
 class Game(object):
-    def __init__(self, player, max_moves=-1):
+    def __init__(self, player, max_moves=-1, initial_food_spawn=1):
         """
         Constructor of the game
         :param player: the player
@@ -62,6 +66,8 @@ class Game(object):
         self.map.spawn_food()
         self.prev_state = get_empty_state()
 
+        self.initial_food_spawn = initial_food_spawn
+
         self.playing = True
         self.starting = True
 
@@ -70,7 +76,8 @@ class Game(object):
         Reset the game to its initial state
         """
         self.map.__init__(max_moves=self.max_moves)
-        self.map.spawn_food()
+        for n in range(self.initial_food_spawn):
+            self.map.spawn_food()
 
         self.prev_state = get_empty_state()
 
@@ -110,7 +117,7 @@ class Game(object):
         if self.playing or self.starting:
             return merge_states(map_to_state(self.map), self.prev_state)
         else:
-            return np.zeros( (COLUMNS, ROWS, 2) )
+            return get_empty_state()
 
     def train(self):
         self.player.train()
@@ -201,13 +208,26 @@ class AIPlayer:
         self.epsilon = max(min_exploration_rate, self.epsilon * exploration_decay_rate)
 
 
+class ParamsSerializer(object):
+    def __init__(self, epsilon, experience):
+        self.epsilon = epsilon
+        self.experience = experience
+
+
 def get_path(num):
     return DATA_DIR + '/' + str(num) + '.' + EXTENSION
 
 
-def read_ai_num(num):
-    with open(get_path(num), 'rb') as f:
-        return pickle.load(f)
+def get_params_path(num):
+    return DATA_DIR + '/' + str(num) + '.' + PARAMS_EXTENSION
+
+
+def read_ai_num(player, num):
+    player.brain.model = tf.keras.models.load_model(get_path(num))
+
+    with open(get_params_path(num), 'rb') as f:
+        params_serializer = pickle.load(f)
+        player.epsilon = params_serializer.epsilon
 
 
 def save_ai_num(ai, num):
@@ -218,5 +238,12 @@ def save_ai_num(ai, num):
     elif os.path.exists(path):
         os.remove(path)
 
+    ai.brain.model.save(path)
+
+    path = get_params_path(num)
+    if os.path.exists(path):
+        os.remove(path)
+
     with open(path, 'wb') as f:
-        pickle.dump(ai, f)
+        params_serializer = ParamsSerializer(ai.epsilon, ai.brain.experience)
+        pickle.dump(params_serializer, f)
