@@ -10,8 +10,6 @@
 import os
 import pickle
 
-from torch import optim
-
 from src.objects import *
 from src.ai import *
 
@@ -82,14 +80,14 @@ class Game(object):
     def step(self):
         """
         Make a step in the game. Get the action to perform from the player and check the result
-        :return: the reward the player got from its action
+        :return: the action and current reward
         """
         reward_val = 0
 
         # Get the player's action
         action = self.player.get_action(self.get_state())
-        if action.item() != NONE:
-            self.map.snake.direction = action.item()
+        if action != NONE:
+            self.map.snake.direction = action
 
         self.prev_state = map_to_state(self.map)
 
@@ -105,9 +103,8 @@ class Game(object):
         if self.starting:
             self.starting = False
 
-        # Return the reward
-        return torch.tensor([action], device=DEVICE), torch.tensor([reward_val], device=DEVICE)
-        # return action, reward_val
+        # Return the player action and reward
+        return action, reward_val
 
     def get_state(self):
         if self.playing or self.starting:
@@ -119,7 +116,7 @@ class Game(object):
         self.player.train()
 
     def set_result(self, state, action, reward, next_state):
-        self.player.set_result(state, action, reward, next_state)
+        self.player.set_result(state, action, reward, next_state, self.playing)
 
     def draw(self, window):
         """
@@ -137,8 +134,8 @@ class Game(object):
         """
         return self.map.snake.get_score()
 
-    def next_episode(self, number):
-        self.player.next_episode(number)
+    def next_episode(self):
+        self.player.reset()
 
 
 # ============================
@@ -149,7 +146,7 @@ class HumanPlayer:
     def __init__(self):
         pass
 
-    def get_action(self, map):
+    def get_action(self, state):
         keys = pygame.key.get_pressed()
 
         action = NONE
@@ -167,58 +164,41 @@ class HumanPlayer:
     def train(self):
         pass
 
-    def set_result(self, state, action, reward, next_state):
+    def set_result(self, state, action, reward, next_state, done):
         pass
 
-    def next_episode(self, number):
+    def reset(self):
         pass
 
 
 class AIPlayer:
     def __init__(self):
-        self.ai = AI(EpsilonGreedyStrategy(), 5)
-        self.network = DeepQNetwork().to(DEVICE)
-        self.target_network = DeepQNetwork().to(DEVICE)
-        self.memory = ReplayMemory(replay_memory_capacity)
-
-        self.target_network.load_state_dict(self.network.state_dict())
-        self.target_network.eval()  # This network will not be trained
-
-        self.optimizer = optim.Adam(params=self.network.parameters(), lr=learning_rate)
+        self.brain = AI()
+        self.target = AI()
+        self.iteration = 0
+        self.epsilon = max_exploration_rate
 
     def get_action(self, state):
-        return self.ai.select_action(
-            torch.from_numpy(state).float(),
-            self.network
+        self.iteration += 1
+
+        return self.brain.get_action(
+            state,
+            self.epsilon
         )
 
     def train(self):
-        if not self.memory.can_provide_sample(batch_size):
-            return
+        self.brain.train(self.target)
 
-        experiences = self.memory.sample(batch_size)
-        states, actions, next_states, rewards = extract_tensors(experiences)
+        if self.iteration % update_frequency:
+            self.target.copy_weights(self.brain)
 
-        current_q_values = QValues.get_current(self.network, states, actions)
-        next_q_values = QValues.get_next(self.target_network, next_states)
-        target_q_values = (next_q_values * discount_rate) + rewards
+    def set_result(self, state, action, reward, next_state, done):
+        self.brain.add_experience(state, action, reward, next_state, done)
 
-        loss = F.mse_loss(current_q_values, target_q_values.unsqueeze(1))
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-
-    def set_result(self, state, action, reward, next_state):
-        self.memory.push(Experience(
-            torch.from_numpy(state).float(),
-            action,
-            torch.from_numpy(next_state).float(),
-            reward
-        ))
-
-    def next_episode(self, number):
-        if number % update_frequency == 0:
-            self.target_network.load_state_dict(self.network.state_dict())
+    def reset(self):
+        self.iteration = 0
+        self.target.copy_weights(self.brain)
+        self.epsilon = max(min_exploration_rate, self.epsilon * exploration_decay_rate)
 
 
 def get_path(num):

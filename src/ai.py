@@ -3,27 +3,14 @@
 # Author: Lorenzo Sonnino
 # GitHub: https://github.com/lsonnino
 #
-# This file contains the AI.
-# Part of the code in this class is based on the DeepLizard
-# tutorial about Deep Q Networks:
-#     website: https://deeplizard.com
-#
 ################################################################
 
 from src.constants import *
 from src.aiSettings import *
 
-import random
-import math
-import torch
-import torch.nn as nn
-from collections import namedtuple
-
-# Defines the experiences as state, action, next state and reward
-Experience = namedtuple(
-    'Experience',  # Name of the tuple class
-    ('state', 'action', 'next_state', 'reward')  # Content of the tuple
-)
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras import optimizers
 
 
 def get_output(outputs):
@@ -39,20 +26,8 @@ def get_output(outputs):
         The fifth one is its will to go down
     :return: The direction the snake will go (RIGHT, TOP, LEFT, BOTTOM or NONE)
     """
-    index = 0
-    multiple = False
-    value = 0
 
-    for i in range(len(outputs)):
-        if outputs[i] > value:
-            value = outputs[i]
-            index = i
-            multiple = False
-        elif outputs[i] == value:
-            multiple = True
-
-    if multiple:
-        return NONE
+    index = np.argmax(outputs)
 
     if index == 1:  # RIGHT
         return RIGHT
@@ -66,206 +41,114 @@ def get_output(outputs):
         return NONE
 
 
-def extract_tensors(experiences):
-    batch = Experience(*zip(*experiences))
-
-    t1 = torch.cat(batch.state)
-    t2 = torch.cat(batch.action)
-    t3 = torch.cat(batch.next_state)
-    t4 = torch.cat(batch.reward)
-
-    return t1, t2, t3, t4
-
-
-class AI(object):
-    """
-    Represents the agent that will perform the actions based on a strategy (for instance an Epsilon Greedy Strategy)
-    """
-
-    def __init__(self, strategy, num_actions):
-        """
-        Constructor
-
-        :param strategy: the strategy that will be used to choose whether to explore or not
-        :param num_actions: the number of possible actions
-        """
-        self.strategy = strategy
-        self.num_actions = num_actions
-        self.current_step = 0
-
-    def select_action(self, state, policy_network):
-        """
-        Selects an action to perform based on the strategy and the state
-
-        :param state: the current state
-        :param policy_network: the neural network that will be used if it chooses to act based on the experience
-        :return: a number between 0 and self.num_actions that represents the chosen action
-        """
-        # Get the will to explore
-        threshold = self.strategy.get_exploration_rate(self.current_step)
-        self.current_step += 1
-
-        if threshold > random.random():  # it chooses to explore
-            action = random.randrange(self.num_actions)
-            return torch.tensor([action]).to(DEVICE)
-        else:  # it chooses to act on experience
-            with torch.no_grad():
-                return policy_network(state).argmax(dim=0).to(DEVICE)
-
-    # def calculate_loss(self, batch, neural_network, target_network):
-        """
-        Calculate MSE between actual state action values,
-        and expected state action values from DQN
-        """
-        """
-        states, actions, rewards, dones, next_states = batch
-
-        states_v = torch.from_numpy(states).float()
-        next_states_v = torch.from_numpy(next_states).float()
-        actions_v = torch.tensor(actions).to(DEVICE)
-        rewards_v = torch.tensor(rewards).to(DEVICE)
-        done = torch.ByteTensor(dones).to(DEVICE)
-
-        state_action_values = neural_network(states_v).gather(1, actions_v.long().unsqueeze(-1)).squeeze(-1)
-        # state_action_values = neural_network(states_v)
-        next_state_values = target_network(next_states_v).max(1)[0]
-        # next_state_values = target_network(next_states_v)
-        # next_state_values[done] = 0.0
-        next_state_values = next_state_values.detach()
-
-        expected_state_action_values = next_state_values * discount_rate + rewards_v
-        return nn.MSELoss()(state_action_values, expected_state_action_values)
-
-    def train(self, neural_network, replay_memory, target_network, optimizer):
-        if not replay_memory.can_provide_sample(batch_size):
-            return
-
-        batch = replay_memory.sample(batch_size)
-
-        for b in batch:
-            optimizer.zero_grad()
-            loss_t = self.calculate_loss(b, neural_network, target_network)
-            loss_t.backward()
-            optimizer.step()
-    """
-
-
-class DeepQNetwork(nn.Module):
-    """
-    Deep Q Network with one input layer and one output layer. Each neuron is connected
-        to all neurons of the next layer.
-
-        The input layer has COLUMNS * ROWS + 3 inputs and 5 outputs
-    """
-
+class NeuralNetwork(tf.keras.Model):
     def __init__(self):
+        super(NeuralNetwork, self).__init__()
+
+        # Input layer
+        self.input_layer = tf.keras.layers.InputLayer(input_shape=(COLUMNS * ROWS * 2,))
+
+        # Hidden layers
+        self.hidden_layers = [0]
+        self.hidden_layers[0] = tf.keras.layers.Dense(COLUMNS * ROWS, activation='tanh', kernel_initializer='RandomNormal')
+
+        # Output layer
+        self.number_of_actions = 5
+        self.output_layer = tf.keras.layers.Dense(self.number_of_actions, activation='linear',
+                                                  kernel_initializer='RandomNormal')
+
+    @tf.function
+    def call(self, inputs):
+        # Input layer
+        z = self.input_layer(inputs)
+
+        # Hidden layers
+        for layer in self.hidden_layers:
+            z = layer(z)
+
+        # Output layer
+        output = self.output_layer(z)
+
+        return output
+
+
+class AI:
+    def __init__(self):
+        self.batch_size = batch_size
+        self.optimizer = optimizers.Adam(learning_rate)
+        self.gamma = discount_rate
+        self.model = NeuralNetwork()
+        self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
+        self.max_experiences = replay_memory_capacity
+        self.min_experiences = batch_size
+
+    def predict(self, inputs):
         """
-        Constructor of the Deep Q Network
+        :param inputs: can eather be a state or a batch of states
         """
-        super().__init__()
+        return self.model(np.atleast_2d(inputs.astype('float32')))
 
-        self.layer1 = nn.Linear(in_features=COLUMNS * ROWS * 2, out_features=COLUMNS * ROWS)
-        self.layer2 = nn.Linear(in_features=COLUMNS * ROWS, out_features=5)
+    @tf.function
+    def train(self, TargetNet):
+        # Do not train if has not acquired enough experience
+        if len(self.experience['state']) < self.min_experiences:
+            return 0
 
-    def forward(self, t):
-        t = t.flatten(start_dim=0)
+        # Select experiences from memory
+        ids = np.random.randint(low=0, high=len(self.experience['state']), size=self.batch_size)
 
-        # t = F.relu(self.layer1(t))
-        t = self.layer1(t)
-        t = self.layer2(t)
+        # Extract experience
+        states = np.asarray([self.experience['state'][i] for i in ids])
+        actions = np.asarray([self.experience['action'][i] for i in ids])
+        rewards = np.asarray([self.experience['reward'][i] for i in ids])
+        next_states = np.asarray([self.experience['next_state'][i] for i in ids])
+        dones = np.asarray([self.experience['done'][i] for i in ids])
 
-        return t
+        # Get predicted value  -- not well understood yet
+        value_next = np.max(TargetNet.predict(next_states), axis=1)
+        actual_values = np.where(dones, rewards, rewards + self.gamma * value_next)
 
+        with tf.GradientTape() as tape:
+            selected_action_values = tf.math.reduce_sum(
+                self.predict(states) * tf.one_hot(actions, self.model.number_of_actions), axis=1)
+            loss = tf.math.reduce_sum(tf.square(actual_values - selected_action_values))
 
-class ReplayMemory(object):
-    """
-    Contains all the past experiences that will be used to train the network
-    """
+        variables = self.model.trainable_variables
+        gradients = tape.gradient(loss, variables)
 
-    def __init__(self, capacity):
-        """
-        Constructor of the memory
-        :param capacity: the number of experiences that will be stored
-        """
-        self.capacity = capacity  # The number of experiences that can be stored
-        self.memory = []  # The experiences
-        self.push_count = 0  # How many experiences have been stored
+        # Apply back propagation
+        self.optimizer.apply_gradients(zip(gradients, variables))
 
-    def push(self, experience):
-        """
-        Add an experience to the memory
-        :param experience: the experience to add
-        """
-        if len(self.memory) < self.capacity:
-            self.memory.append(experience)
+    def get_action(self, states, epsilon):
+        if np.random.random() < epsilon:
+            # Try something new
+            rnd = np.random.choice(self.model.number_of_actions)
+            output = np.zeros(self.model.number_of_actions)
+            output[int(rnd)] = 1
+            return get_output(output)
         else:
-            self.memory[self.push_count % self.capacity] = experience
+            # Use experience
+            return get_output(self.predict(np.atleast_2d(states)))
 
-        self.push_count += 1
+    def add_experience(self, state, action, reward, next_state, done):
+        exp = {'state': state, 'action': action, 'reward': reward, 'next_state': next_state, 'done': done}
 
-    def sample(self, batch_size):
+        # If has gathered max experience, drop the oldest one
+        if len(self.experience['state']) >= self.max_experiences:
+            for key in self.experience.keys():
+                self.experience[key].pop(0)
+
+        # Add the experience to the memory
+        for key, value in exp.items():
+            self.experience[key].append(value)
+
+    def copy_weights(self, TrainNet):
         """
-        Get a random sample of experiences from the memory
-        :param batch_size: the number of experiences that will be returned
-        :return: a random set of experiences
+        Make this NN the same as {@code TrainNet}
         """
-        return random.sample(self.memory, batch_size)
+        variables1 = self.model.trainable_variables
+        variables2 = TrainNet.model.trainable_variables
 
-    def can_provide_sample(self, batch_size):
-        """
-        Get if there are enough experiences to complete a batch
-        :param batch_size: the number of experiences that needs to be stored
-        :return: True if it contains enough experiences, False otherwise
-        """
-        return len(self.memory) >= batch_size
+        for v1, v2 in zip(variables1, variables2):
+            v1.assign(v2.numpy())
 
-
-class EpsilonGreedyStrategy(object):
-    """
-    Represents the will of the AI to explore new strategies or to play from experience
-    """
-
-    def __init__(self, start=max_exploration_rate, end=min_exploration_rate, decay=exploration_decay_rate):
-        """
-        Constructor
-
-        :param start: the initial will to explore from 0 to 1
-        :param end: the final will to explore from 0 to 1
-        :param decay: the decay to pass from start to end from 0 to 1
-        """
-        self.start = start
-        self.end = end
-        self.decay = decay
-
-    def get_exploration_rate(self, current_step):
-        """
-        Get the will to explore
-
-        :param current_step: the current step
-        :return: the will from 0 to 1
-        """
-        return self.end + (self.start - self.end) * math.exp(-1 * current_step * self.decay)
-
-
-class QValues():
-    @staticmethod
-    def get_current(policy_network, states, actions):
-        return policy_network(states).gather(dim=1, index=actions.unsqueeze(-1))
-        # q_values = []
-        # for s in states:
-        #     q_values.append(policy_network(s))
-        # return q_values.gather(dim=1, index=actions.unsqueeze(-1))
-        # return q_values
-
-
-    @staticmethod
-    def get_next(target_network, next_states):
-        final_state_locations = next_states.flatten(start_dim=1).max(dim=1)[0].eq(0).type(torch.bool)
-
-        non_final_state_locations = (final_state_locations == False)
-        non_final_states = next_states[non_final_state_locations]
-
-        batch_size = next_states.shape[0]
-        values = torch.zeros(batch_size).to(DEVICE)
-        values[non_final_state_locations] = target_network(non_final_states).max(dim=1)[0].detach()
-        return values

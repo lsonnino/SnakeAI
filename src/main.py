@@ -118,8 +118,8 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
     if AI_PLAYS:
         # Printing score
         print("AI score for gen " + str(ai_generation) + ": " + str(score))
-        step = game.player.ai.current_step
-        print("current step: " + str(step) + " - greed: " + str(game.player.ai.strategy.get_exploration_rate(step)))
+        step = game.player.iteration
+        print("current step: " + str(step) + " - greed: " + str(game.player.epsilon))
 
         ai_generation += 1
     else:
@@ -128,7 +128,7 @@ while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
 
     gameNum += 1
 
-    game.next_episode(gameNum)
+    game.next_episode()
 
 if AI_PLAYS:
     save_ai_num(game.player, gameNum)
