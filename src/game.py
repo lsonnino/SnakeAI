@@ -106,7 +106,7 @@ class Game(object):
             reward_val = -1
         elif self.map.check_food():  # The snake got some food
             self.map.snake.got_food()
-            reward_val = 1
+            reward_val = 5
 
         if self.starting:
             self.starting = False

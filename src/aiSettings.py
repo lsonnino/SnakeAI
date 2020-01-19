@@ -12,7 +12,7 @@
 discount_rate = 0.6  # must be between 0 and 1
 
 # The bigger the learning rate, the less the AI will use previous mistakes. It is often called Alpha
-learning_rate = 0.001  # must be between 0 and 1
+learning_rate = 0.01  # must be between 0 and 1
 
 max_exploration_rate = 0.99  # must be between 0 and 1
 min_exploration_rate = 0.01  # must be between 0 and 1
