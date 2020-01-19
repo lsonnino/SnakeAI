@@ -214,9 +214,10 @@ class AIPlayer:
 
 
 class ParamsSerializer(object):
-    def __init__(self, epsilon, experience):
+    def __init__(self, epsilon, experience, model):
         self.epsilon = epsilon
         self.experience = experience
+        self.model = model
 
 
 def get_path(num):
@@ -228,14 +229,10 @@ def get_params_path(num):
 
 
 def read_ai_num(player, num):
-    # player.brain.model = tf.keras.models.load_model(get_path(num))
-    with open(get_path(num)) as json_file:
-        json_string = json.load(json_file)
-        player.brain.model = tf.keras.models.model_from_json(json_string)
-
-    with open(get_params_path(num), 'rb') as f:
+    with open(get_path(num), 'rb') as f:
         params_serializer = pickle.load(f)
         player.epsilon = params_serializer.epsilon
+        player.brain.model = tf.keras.models.model_from_json(params_serializer.model)
 
 
 def save_ai_num(ai, num):
@@ -246,15 +243,8 @@ def save_ai_num(ai, num):
     elif os.path.exists(path):
         os.remove(path)
 
-    # ai.brain.model.save(path)
     json_string = ai.brain.model.to_json()
-    with open(path, 'w') as f:
-        json.dump(json_string, f)
-
-    path = get_params_path(num)
-    if os.path.exists(path):
-        os.remove(path)
 
     with open(path, 'wb') as f:
-        params_serializer = ParamsSerializer(ai.epsilon, ai.brain.experience)
+        params_serializer = ParamsSerializer(ai.epsilon, ai.brain.experience, json_string)
         pickle.dump(params_serializer, f)
