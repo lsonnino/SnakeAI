@@ -205,7 +205,11 @@ class AIPlayer:
     def reset(self):
         self.iteration = 0
         self.target.copy_weights(self.brain)
-        self.epsilon = max(min_exploration_rate, self.epsilon * exploration_decay_rate)
+
+        if self.epsilon > ss_thresh:
+            self.epsilon = max(ss_thresh, self.epsilon * ss_exploration_decay_rate)
+        else:
+            self.epsilon = max(min_exploration_rate, self.epsilon * exploration_decay_rate)
 
 
 class ParamsSerializer(object):
