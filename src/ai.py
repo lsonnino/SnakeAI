@@ -9,6 +9,7 @@ from src.constants import *
 from src.aiSettings import *
 
 import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 from tensorflow.keras import optimizers
 
@@ -47,10 +48,10 @@ class AI:
         self.gamma = discount_rate
         self.number_of_actions = 5
 
-        inputs = tf.keras.Input(shape=(COLUMNS * ROWS * 2,), name='input')
-        x = tf.keras.layers.Dense(COLUMNS * ROWS, activation='tanh', name='hidden_layer')(inputs)
-        outputs = tf.keras.layers.Dense(self.number_of_actions, activation='linear', name='output')(x)
-        self.model = tf.keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
+        inputs = keras.Input(shape=(COLUMNS * ROWS * 2,), name='input')
+        x = keras.layers.Dense(COLUMNS * ROWS, activation='tanh', name='hidden_layer')(inputs)
+        outputs = keras.layers.Dense(self.number_of_actions, activation='linear', name='output')(x)
+        self.model = keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
 
         self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
         self.max_experiences = replay_memory_capacity
@@ -127,4 +128,4 @@ class AI:
         for v1, v2 in zip(variables1, variables2):
             v1.assign(v2.numpy())
         '''
-        self.model = tf.keras.models.clone_model(TrainNet.model)
+        self.model = keras.models.clone_model(TrainNet.model)

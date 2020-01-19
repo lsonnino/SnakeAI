@@ -141,4 +141,3 @@ def main():
 snake_ai = compile('main()', 'snake_ai', 'exec')
 
 exec(snake_ai)
-
