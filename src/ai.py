@@ -49,8 +49,8 @@ class AI:
         self.gamma = discount_rate
         self.number_of_actions = 5
 
-        inputs = keras.Input(shape=(COLUMNS * ROWS * 2,), name='input')
-        x = keras.layers.Dense(COLUMNS * ROWS, activation='tanh', name='hidden_layer')(inputs)
+        inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
+        x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='tanh', name='hidden_layer')(inputs)
         outputs = keras.layers.Dense(self.number_of_actions, activation='linear', name='output')(x)
         self.model = keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
 

@@ -29,7 +29,10 @@ def map_to_state(map):
 
     # Add the snake
     for piece in map.snake.body:
-        state[piece[0]* ROWS + piece[1]] = -1
+        state[piece[0] * ROWS + piece[1]] = -1
+
+    head = map.snake.body[0]
+    state[head[0] * ROWS + head[1]] = -2
 
     return state
 
@@ -38,16 +41,19 @@ def get_empty_state():
     return np.zeros(COLUMNS * ROWS)
 
 
-def merge_states(new, previous):
-    '''
+def merge_states(new, direction):
+    """
     merged = np.zeros( (COLUMNS, ROWS, 2) )
 
     for x in range(COLUMNS):
         for y in range(ROWS):
             merged[x, y] = [new[x, y], previous[x, y]]
-    '''
+    """
+    direction_array = np.zeros(4)
+    if direction != NONE:
+        direction_array[direction] = 1
 
-    merged = np.concatenate((previous, new))
+    merged = np.concatenate((new, direction_array))
 
     return merged
 
@@ -79,8 +85,6 @@ class Game(object):
         for n in range(self.initial_food_spawn):
             self.map.spawn_food()
 
-        self.prev_state = get_empty_state()
-
         self.playing = True
         self.starting = True
 
@@ -95,8 +99,6 @@ class Game(object):
         action = self.player.get_action(self.get_state())
         if action != NONE:
             self.map.snake.direction = action
-
-        self.prev_state = map_to_state(self.map)
 
         # Make the snake's move and check result
         if not self.map.snake.walk():
@@ -115,9 +117,9 @@ class Game(object):
 
     def get_state(self):
         if self.playing or self.starting:
-            return merge_states(map_to_state(self.map), self.prev_state)
+            return merge_states(map_to_state(self.map), self.map.snake.direction)
         else:
-            return get_empty_state()
+            return merge_states(get_empty_state(), NONE)
 
     def train(self):
         self.player.train()

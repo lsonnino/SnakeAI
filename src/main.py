@@ -47,24 +47,24 @@ def main():
     else:
         player = HumanPlayer()
 
-    gameNum = 1  # keeps track of the number of played games
+    game_num = 1  # keeps track of the number of played games
 
     # Create the game
-    initial_food_spawn = max(1, INITIAL_FOOD_SPAWN - int(ai_generation / INITIAL_FOOD_SPAWN_DECAY))
+    initial_food_spawn = max(1, INITIAL_FOOD_SPAWN)
     game = Game(player, max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1), initial_food_spawn=initial_food_spawn)
     # Load the snake
     if AI_PLAYS and LOAD_NUMBER >= 0:
         if os.path.exists(get_path(LOAD_NUMBER)):
             read_ai_num(game.player, LOAD_NUMBER)
-            gameNum = LOAD_NUMBER
+            game_num = LOAD_NUMBER
             ai_generation = LOAD_NUMBER
 
     # Keeps the game running
     running = True
-    while running and (NUMBER_OF_GAMES < 0 or gameNum < NUMBER_OF_GAMES):
+    while running and (NUMBER_OF_GAMES < 0 or game_num < NUMBER_OF_GAMES):
         # Save the ai
-        if AI_PLAYS and gameNum % SAVE_EVERY == 0:
-            save_ai_num(game.player, gameNum)
+        if AI_PLAYS and game_num % SAVE_EVERY == 0:
+            save_ai_num(game.player, game_num)
 
         # Reset the game
         game.reset()
@@ -130,12 +130,12 @@ def main():
             # Printing score
             print("Game score: " + str(last_score))
 
-        gameNum += 1
+        game_num += 1
 
         game.next_episode()
 
     if AI_PLAYS:
-        save_ai_num(game.player, gameNum)
+        save_ai_num(game.player, game_num)
 
 
 snake_ai = compile('main()', 'snake_ai', 'exec')

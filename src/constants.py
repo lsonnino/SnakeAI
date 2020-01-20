@@ -30,8 +30,6 @@ CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 
 INITIAL_FOOD_SPAWN = 30  # The number of apples that will spawn at game launch
-INITIAL_FOOD_SPAWN_DECAY = 10  # Decreases the initial food spawn by one every {INITIAL_FOOD_SPAWN_DECAY} generations
-#                                   Only used at game startup. Then food spawn stays constant
 
 FPS_AI = 120  # The used frame rate if the AI plays (the bigger, the faster it plays)
 FPS_HUMAN = 10  # The used frame rate if the human plays
@@ -52,8 +50,8 @@ EMPTY = 0
 FOOD = 1
 SNAKE = 2
 
-RIGHT = 1
-TOP = 2
-LEFT = 3
-BOTTOM = 4
-NONE = 0
+RIGHT = 0
+TOP = 1
+LEFT = 2
+BOTTOM = 3
+NONE = -1
