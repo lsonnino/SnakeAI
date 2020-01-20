@@ -43,8 +43,9 @@ class AI:
         self.number_of_actions = 4
 
         inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
-        x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='linear', name='hidden_layer')(inputs)
-        outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(x)
+        # x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='linear', name='hidden_layer')(inputs)
+        # outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(x)
+        outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(inputs)
         self.model = keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
 
         self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}

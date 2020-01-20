@@ -25,7 +25,7 @@ batch_size = 128  # must be greater than 1
 # The number of elements that can be contained in the memory
 replay_memory_capacity = 1024  # must be greater than 1
 # The number of times the AI will train before updating his semi-constant network
-update_frequency = 200  # must be greater than 1
+update_frequency = 100  # must be greater than 1
 
 
 # The maximum number the AI is allowed to make to get some food. If he gets
