@@ -68,16 +68,12 @@ def main():
     if AI_PLAYS and LOAD_NUMBER >= 0:
         if os.path.exists(get_path(LOAD_NUMBER)):
             read_ai_num(game.player, LOAD_NUMBER)
-            game_num = LOAD_NUMBER
+            game_num = LOAD_NUMBER + 1
             ai_generation = LOAD_NUMBER
 
     # Keeps the game running
     running = True
     while running and (NUMBER_OF_GAMES < 0 or game_num < NUMBER_OF_GAMES):
-        # Save the ai
-        if AI_PLAYS and game_num % SAVE_EVERY == 0:
-            save_ai_num(game.player, game_num)
-
         # Reset the game
         game.reset()
         state = game.get_state()
@@ -148,6 +144,10 @@ def main():
         else:
             # Printing score
             print("Game score: " + str(last_score))
+
+        # Save the ai
+        if AI_PLAYS and game_num % SAVE_EVERY == 0:
+            save_ai_num(game.player, game_num)
 
         game_num += 1
 
