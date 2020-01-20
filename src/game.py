@@ -232,8 +232,9 @@ def get_params_path(num):
 def read_ai_num(player, num):
     with open(get_path(num), 'rb') as f:
         params_serializer = pickle.load(f)
-        player.epsilon = params_serializer.epsilon
         player.brain.model = tf.keras.models.model_from_json(params_serializer.model)
+        if not RESET_GREED:
+            player.epsilon = params_serializer.epsilon
 
 
 def save_ai_num(ai, num):
