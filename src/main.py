@@ -71,6 +71,9 @@ def main():
             game_num = LOAD_NUMBER + 1
             ai_generation = LOAD_NUMBER
 
+    if AI_PLAYS:
+        game.player.brain.model.summary()
+
     # Keeps the game running
     running = True
     while running and (NUMBER_OF_GAMES < 0 or game_num < NUMBER_OF_GAMES):
