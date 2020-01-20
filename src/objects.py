@@ -115,7 +115,7 @@ class Snake(object):
 
     def draw(self, window):
         """
-        Draws the snnake in the given window
+        Draws the snake in the given window
         :param window: the window to draw in
         """
         # Runs the body

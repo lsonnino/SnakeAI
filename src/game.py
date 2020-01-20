@@ -9,7 +9,6 @@
 
 import os
 import pickle
-import json
 
 from src.objects import *
 from src.ai import *

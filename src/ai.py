@@ -41,6 +41,7 @@ def get_output(outputs):
     else:  # None
         return NONE
 
+
 class AI:
     def __init__(self):
         self.batch_size = batch_size
@@ -59,12 +60,12 @@ class AI:
 
     def predict(self, inputs):
         """
-        :param inputs: can eather be a state or a batch of states
+        :param inputs: can either be a state or a batch of states
         """
         return self.model(np.atleast_2d(inputs.astype('float32')))
 
     @tf.function
-    def train(self, TargetNet):
+    def train(self, target_net):
         # Do not train if has not acquired enough experience
         if len(self.experience['state']) < self.min_experiences:
             return 0
@@ -77,11 +78,11 @@ class AI:
         actions = np.asarray([self.experience['action'][i] for i in ids])
         rewards = np.asarray([self.experience['reward'][i] for i in ids])
         next_states = np.asarray([self.experience['next_state'][i] for i in ids])
-        dones = np.asarray([self.experience['done'][i] for i in ids])
+        is_last = np.asarray([self.experience['done'][i] for i in ids])
 
         # Get predicted value  -- not well understood yet
-        value_next = np.max(TargetNet.predict(next_states), axis=1)
-        actual_values = np.where(dones, rewards, rewards + self.gamma * value_next)
+        value_next = np.max(target_net.predict(next_states), axis=1)
+        actual_values = np.where(is_last, rewards, rewards + self.gamma * value_next)
 
         with tf.GradientTape() as tape:
             selected_action_values = tf.math.reduce_sum(
@@ -117,7 +118,7 @@ class AI:
         for key, value in exp.items():
             self.experience[key].append(value)
 
-    def copy_weights(self, TrainNet):
+    def copy_weights(self, train_net):
         """
         Make this NN the same as {@code TrainNet}
         """
@@ -128,4 +129,4 @@ class AI:
         for v1, v2 in zip(variables1, variables2):
             v1.assign(v2.numpy())
         '''
-        self.model = keras.models.clone_model(TrainNet.model)
+        self.model = keras.models.clone_model(train_net.model)

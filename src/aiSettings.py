@@ -15,10 +15,10 @@ discount_rate = 0.6  # must be between 0 and 1
 learning_rate = 0.01  # must be between 0 and 1
 
 max_exploration_rate = 0.99  # must be between 0 and 1
-min_exploration_rate = 0.01  # must be between 0 and 1
+min_exploration_rate = 0.05  # must be between 0 and 1
 exploration_decay_rate = 0.9999  # must be between 0 and 1
-ss_exploration_decay_rate = 0.999  # must be between 0 and 1
-ss_thresh = 0.8
+ss_exploration_decay_rate = 0.995  # must be between 0 and 1
+ss_thresh = 0.7
 
 # The number of experiences the AI will use to train after each step
 batch_size = 256  # must be greater than 1
