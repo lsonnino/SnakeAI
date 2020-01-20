@@ -11,13 +11,13 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
-NUMBER_OF_GAMES = 1000  # -1 to play infinite games
+NUMBER_OF_GAMES = 10000  # -1 to play infinite games
 SAVE_EVERY = 100  # Must be greater than 0
-LOAD_NUMBER = 800  # -1 to start from the beginning
+LOAD_NUMBER = 1000  # -1 to start from the beginning
 DATA_DIR = "data"
 EXTENSION = "snake"
 PARAMS_EXTENSION = "params"
-GRAPHICS = False
+GRAPHICS = True
 RESET_GREED = False
 
 FONT = "Arial"
@@ -25,8 +25,8 @@ FONT_SIZE = 20
 
 # World constants
 WIN_SIZE = (760, 760)  # The size of the window
-ROWS = 38  # The number of rows
-COLUMNS = 38  # The number of columns
+ROWS = 20  # The number of rows (38 is a good size)
+COLUMNS = 20  # The number of columns (38 is a good size)
 CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 

@@ -3,6 +3,10 @@
 # Author: Lorenzo Sonnino
 # GitHub: https://github.com/lsonnino
 #
+# Inspired by: towardsdatascience.com
+#     https://towardsdatascience.com/
+#         deep-reinforcement-learning-build-a-deep-q-network-dqn-to-play-cartpole-with-tensorflow-2-and-gym-8e105744b998
+#
 ################################################################
 
 from src.constants import *
@@ -39,8 +43,8 @@ class AI:
         self.number_of_actions = 4
 
         inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
-        x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='tanh', name='hidden_layer')(inputs)
-        outputs = keras.layers.Dense(self.number_of_actions, activation='linear', name='output')(x)
+        x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='linear', name='hidden_layer')(inputs)
+        outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(x)
         self.model = keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
 
         self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
