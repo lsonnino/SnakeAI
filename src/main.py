@@ -21,6 +21,18 @@
 from src.game import *
 
 
+def ai_action_to_text(direction):
+    if direction == RIGHT:
+        return "Right"
+    elif direction == LEFT:
+        return "Left"
+    elif direction == BOTTOM:
+        return "Down"
+    elif direction == TOP:
+        return "Up"
+    else:
+        return "None"
+
 def main():
     if GRAPHICS:
         # Start the game
@@ -108,9 +120,16 @@ def main():
                 # Merge the texts with the window
                 window.blit(text_surface, (10, 10))
                 if AI_PLAYS:
+                    # Generation
                     text_surface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
                     # Merge the texts with the window
                     window.blit(text_surface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
+
+                    # Action
+                    text = "Action: " + ai_action_to_text(game.map.snake.direction)
+                    text_surface = font.render(text, False, TEXT_COLOR)
+                    # Merge the texts with the window
+                    window.blit(text_surface, (10, WIN_SIZE[1] - 20 - 2 * FONT_SIZE))
 
                 # Refresh the window
                 pygame.display.flip()

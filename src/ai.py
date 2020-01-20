@@ -28,18 +28,7 @@ def get_output(outputs):
     :return: The direction the snake will go (RIGHT, TOP, LEFT, BOTTOM or NONE)
     """
 
-    index = np.argmax(outputs)
-
-    if index == 1:  # RIGHT
-        return RIGHT
-    elif index == 2:  # TOP
-        return TOP
-    elif index == 3:  # LEFT
-        return LEFT
-    elif index == 4:  # BOTTOM
-        return BOTTOM
-    else:  # None
-        return NONE
+    return np.argmax(outputs)
 
 
 class AI:
@@ -47,7 +36,7 @@ class AI:
         self.batch_size = batch_size
         self.optimizer = optimizers.Adam(learning_rate)
         self.gamma = discount_rate
-        self.number_of_actions = 5
+        self.number_of_actions = 4
 
         inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
         x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='tanh', name='hidden_layer')(inputs)

@@ -133,9 +133,9 @@ class Snake(object):
             new_head = (self.body[0][0] + 1, self.body[0][1])
         elif self.direction == LEFT:  # Going leftwards
             new_head = (self.body[0][0] - 1, self.body[0][1])
-        elif self.direction == TOP:  # Going up
+        elif self.direction == TOP:  # Going upwards
             new_head = (self.body[0][0], self.body[0][1] - 1)
-        elif self.direction == BOTTOM:  # Going down
+        elif self.direction == BOTTOM:  # Going downwards
             new_head = (self.body[0][0], self.body[0][1] + 1)
         else:
             return True

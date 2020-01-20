@@ -17,7 +17,7 @@ LOAD_NUMBER = -1  # -1 to start from the beginning
 DATA_DIR = "data"
 EXTENSION = "snake"
 PARAMS_EXTENSION = "params"
-GRAPHICS = False
+GRAPHICS = True
 
 FONT = "Arial"
 FONT_SIZE = 20
@@ -54,4 +54,4 @@ RIGHT = 0
 TOP = 1
 LEFT = 2
 BOTTOM = 3
-NONE = -1
+NONE = 4
