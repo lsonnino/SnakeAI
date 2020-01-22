@@ -55,7 +55,7 @@ def main():
     # setup AI
     if AI_PLAYS:
         ai_generation = 1
-        player = AIPlayer()
+        player = AIPlayer(AI_MODEL_BUILDER)
     else:
         player = HumanPlayer()
 
@@ -63,7 +63,8 @@ def main():
 
     # Create the game
     initial_food_spawn = max(1, INITIAL_FOOD_SPAWN)
-    game = Game(player, max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1), initial_food_spawn=initial_food_spawn)
+    game = Game(player, STATE_BUILDER, EMPTY_STATE_BUILDER,
+                max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1), initial_food_spawn=initial_food_spawn)
     # Load the snake
     if AI_PLAYS and LOAD_NUMBER >= 0:
         if os.path.exists(get_path(LOAD_NUMBER)):

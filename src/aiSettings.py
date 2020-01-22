@@ -7,6 +7,8 @@
 #
 ################################################################
 
+from src.models import *
+
 # The bigger the discount rate, the more importance the AI will accord to future rewards
 # in comparison with the present ones. It is often called Gamma
 discount_rate = 0.8  # must be between 0 and 1
@@ -31,3 +33,7 @@ update_frequency = 100  # must be greater than 1
 # The maximum number the AI is allowed to make to get some food. If he gets
 # food, he survives and reset its number. It dies otherwise.
 AI_MAX_ALLOWED_MOVES = 300  # must be less than 0 if infinite number of moves, greater than 0 otherwise
+
+AI_MODEL_BUILDER = omniscient_ai_model_builder
+STATE_BUILDER = omniscient_state_builder
+EMPTY_STATE_BUILDER = omniscient_empty_state_builder

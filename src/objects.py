@@ -7,10 +7,11 @@
 #
 ################################################################
 
-import random
-import numpy as np
-import pygame
 from src.constants import *
+
+import random
+import pygame
+import numpy as np
 
 
 def draw_case(window, color, x, y):

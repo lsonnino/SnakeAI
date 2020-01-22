@@ -9,7 +9,6 @@
 #
 ################################################################
 
-from src.constants import *
 from src.aiSettings import *
 
 import tensorflow as tf
@@ -36,17 +35,13 @@ def get_output(outputs):
 
 
 class AI:
-    def __init__(self):
+    def __init__(self, model_builder):
         self.batch_size = batch_size
         self.optimizer = optimizers.Adam(learning_rate)
         self.gamma = discount_rate
-        self.number_of_actions = 4
 
-        inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
-        # x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='linear', name='hidden_layer')(inputs)
-        # outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(x)
-        outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(inputs)
-        self.model = keras.Model(inputs=inputs, outputs=outputs, name='SnakeAI')
+        self.number_of_actions, inputs, outputs, name = model_builder()
+        self.model = keras.Model(inputs=inputs, outputs=outputs, name=name)
 
         self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
         self.max_experiences = replay_memory_capacity
@@ -124,3 +119,5 @@ class AI:
             v1.assign(v2.numpy())
         '''
         self.model = keras.models.clone_model(train_net.model)
+
+

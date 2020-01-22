@@ -14,63 +14,25 @@ from src.objects import *
 from src.ai import *
 
 
-def map_to_state(map):
-    state = np.zeros(COLUMNS * ROWS)
-
-    # Runs the map
-    for x in range(COLUMNS):
-        for y in range(ROWS):
-            if map.map[x, y] == FOOD:
-                value = 1
-            else:
-                value = 0
-
-            state[x * ROWS + y] = value
-
-    # Add the snake
-    for piece in map.snake.body:
-        state[piece[0] * ROWS + piece[1]] = -1
-
-    head = map.snake.body[0]
-    state[head[0] * ROWS + head[1]] = -2
-
-    return state
-
-
-def get_empty_state():
-    return np.zeros(COLUMNS * ROWS)
-
-
-def merge_states(new, direction):
-    """
-    merged = np.zeros( (COLUMNS, ROWS, 2) )
-
-    for x in range(COLUMNS):
-        for y in range(ROWS):
-            merged[x, y] = [new[x, y], previous[x, y]]
-    """
-    direction_array = np.zeros(4)
-    if direction != NONE:
-        direction_array[direction] = 1
-
-    merged = np.concatenate((new, direction_array))
-
-    return merged
-
-
 class Game(object):
-    def __init__(self, player, max_moves=-1, initial_food_spawn=1):
+    def __init__(self, player, state_builder, empty_state_builder, max_moves=-1, initial_food_spawn=1):
         """
         Constructor of the game
         :param player: the player
+        :param state_builder: a function that creates a state from the map to feed the AI
+        :param empty_state_builder: a function that creates an empty state to feed the AI
         :param max_moves: the maximum number of moves the snake is allowed to perform to get some food
                 before dying. -1 means that there is no maximum.
+        :param initial_food_spawn: the number of food pieces that will spawn
         """
+        self.empty_state_builder = empty_state_builder
+        self.state_builder = state_builder
+
         self.max_moves = max_moves
         self.player = player
         self.map = Map(max_moves=max_moves)
         self.map.spawn_food()
-        self.prev_state = get_empty_state()
+        self.prev_state = self.empty_state_builder()
 
         self.initial_food_spawn = initial_food_spawn
 
@@ -116,10 +78,7 @@ class Game(object):
         return action, reward_val
 
     def get_state(self):
-        if self.playing or self.starting:
-            return merge_states(map_to_state(self.map), self.map.snake.direction)
-        else:
-            return merge_states(get_empty_state(), NONE)
+        return self.state_builder(self.map, self.playing or self.starting)
 
     def train(self):
         self.player.train()
@@ -181,9 +140,9 @@ class HumanPlayer:
 
 
 class AIPlayer:
-    def __init__(self):
-        self.brain = AI()
-        self.target = AI()
+    def __init__(self, ai_model_builder):
+        self.brain = AI(ai_model_builder)
+        self.target = AI(ai_model_builder)
         self.iteration = 0
         self.epsilon = max_exploration_rate
 
