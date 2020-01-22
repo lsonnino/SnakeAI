@@ -143,7 +143,7 @@ def main():
             # Printing score
             print("AI score for gen " + str(ai_generation) + ": " + str(last_score))
             step = game.player.iteration
-            print("current step: " + str(step) + " - greed: " + str(game.player.epsilon))
+            print("current step: " + str(step) + " - greed: " + str(round(game.player.epsilon * 100, 2)) + "%")
 
             ai_generation += 1
         else:

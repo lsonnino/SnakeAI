@@ -11,9 +11,9 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
-NUMBER_OF_GAMES = 1000  # -1 to play infinite games
-SAVE_EVERY = 100  # Must be greater than 0
-LOAD_NUMBER = -1  # -1 to start from the beginning
+NUMBER_OF_GAMES = -1  # -1 to play infinite games
+SAVE_EVERY = 500  # Must be greater than 0
+LOAD_NUMBER = 1000  # -1 to start from the beginning
 DATA_DIR = "data"
 EXTENSION = "snake"
 PARAMS_EXTENSION = "params"
@@ -39,7 +39,7 @@ if AI_PLAYS:
 else:
     FPS = FPS_HUMAN
 
-# Game style -- each color is defined in here
+# Game style -- every color is defined in here
 EMPTY_COLOR = (230, 230, 240)
 FOOD_COLOR = (255, 59, 48)
 SNAKE_COLOR = (0, 122, 255)
