@@ -78,7 +78,7 @@ class Game(object):
         return action, reward_val
 
     def get_state(self):
-        return self.state_builder(self.map, self.playing or self.starting)
+        return self.state_builder(self.map, self.playing, self.starting)
 
     def train(self):
         self.player.train()

@@ -11,13 +11,13 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
-NUMBER_OF_GAMES = 10000  # -1 to play infinite games
-SAVE_EVERY = 500  # Must be greater than 0
-LOAD_NUMBER = 3500  # -1 to start from the beginning
+NUMBER_OF_GAMES = 1000  # -1 to play infinite games
+SAVE_EVERY = 100  # Must be greater than 0
+LOAD_NUMBER = -1  # -1 to start from the beginning
 DATA_DIR = "data"
 EXTENSION = "snake"
 PARAMS_EXTENSION = "params"
-GRAPHICS = True
+GRAPHICS = False
 RESET_GREED = False
 
 FONT = "Arial"
@@ -30,7 +30,7 @@ COLUMNS = 20  # The number of columns (38 is a good size)
 CASE_WIDTH = WIN_SIZE[0] / COLUMNS
 CASE_HEIGHT = WIN_SIZE[1] / ROWS
 
-INITIAL_FOOD_SPAWN = 30  # The number of apples that will spawn at game launch
+INITIAL_FOOD_SPAWN = 1  # The number of apples that will spawn at game launch
 
 FPS_AI = 120  # The used frame rate if the AI plays (the bigger, the faster it plays)
 FPS_HUMAN = 10  # The used frame rate if the human plays

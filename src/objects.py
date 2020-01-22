@@ -35,6 +35,7 @@ class Map(object):
 
         self.map = np.zeros((COLUMNS, ROWS), dtype=int)
         self.snake = Snake(max_moves)
+        self.food_position = (0, 0)
 
     def draw(self, window):
         """
@@ -66,6 +67,7 @@ class Map(object):
             y = random.randint(0, ROWS - 1)
             if not self.snake.body.__contains__((x, y)):
                 self.map[x, y] = FOOD
+                self.food_position = (x, y)
                 found = True
 
     def take_food(self, x, y):

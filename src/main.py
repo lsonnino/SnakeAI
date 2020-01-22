@@ -33,6 +33,7 @@ def ai_action_to_text(direction):
     else:
         return "None"
 
+
 def main():
     if GRAPHICS:
         # Start the game

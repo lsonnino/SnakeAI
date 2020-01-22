@@ -32,8 +32,20 @@ update_frequency = 100  # must be greater than 1
 
 # The maximum number the AI is allowed to make to get some food. If he gets
 # food, he survives and reset its number. It dies otherwise.
-AI_MAX_ALLOWED_MOVES = 300  # must be less than 0 if infinite number of moves, greater than 0 otherwise
+AI_MAX_ALLOWED_MOVES = COLUMNS * ROWS  # must be less than 0 if infinite number of moves, greater than 0 otherwise
 
-AI_MODEL_BUILDER = omniscient_ai_model_builder
-STATE_BUILDER = omniscient_state_builder
-EMPTY_STATE_BUILDER = omniscient_empty_state_builder
+
+# Model selection
+
+OMNISCIENT_MODEL = 0
+TRI_DIRECTIONAL = 1
+selected_model = TRI_DIRECTIONAL
+
+if selected_model == TRI_DIRECTIONAL:
+    AI_MODEL_BUILDER = tri_directional_ai_model_builder
+    STATE_BUILDER = tri_directional_state_builder
+    EMPTY_STATE_BUILDER = tri_directional_empty_state_builder
+else:
+    AI_MODEL_BUILDER = omniscient_ai_model_builder
+    STATE_BUILDER = omniscient_state_builder
+    EMPTY_STATE_BUILDER = omniscient_empty_state_builder
