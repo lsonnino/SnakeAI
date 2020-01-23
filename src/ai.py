@@ -3,121 +3,139 @@
 # Author: Lorenzo Sonnino
 # GitHub: https://github.com/lsonnino
 #
-# Inspired by: towardsdatascience.com
-#     https://towardsdatascience.com/
-#         deep-reinforcement-learning-build-a-deep-q-network-dqn-to-play-cartpole-with-tensorflow-2-and-gym-8e105744b998
+# Based on 'Deep Q Learning is Simple with Tensorflow (Tutorial)' by Machine Learning with Phil tutorial on Youtube
 #
 ################################################################
 
 from src.aiSettings import *
 
-import tensorflow as tf
-from tensorflow import keras
 import numpy as np
-from tensorflow.keras import optimizers
+import tensorflow.compat.v1 as tf
 
 
-def get_output(outputs):
-    """
-    Interprets the result of the neural network to work out the next step.
-    If the neural network is not sure, it does nothing
-
-    :param outputs: the outputs of the neural network. An array of five values:
-        The first one is its will to do nothing
-        The second one is its will to go right
-        The third one is its will to go up
-        The fourth one is its will to go left
-        The fifth one is its will to go down
-    :return: The direction the snake will go (RIGHT, TOP, LEFT, BOTTOM or NONE)
-    """
-
-    return np.argmax(outputs)
+tf.disable_v2_behavior()
 
 
-class AI:
-    def __init__(self, model_builder):
+class Network(object):
+    def __init__(self, learning_rate, n_actions, name, input_dims, network_builder):
+        self.learning_rate = learning_rate
+        self.n_actions = n_actions
+        self.name = name
+        self.input_dims = input_dims
+
+        self.session = tf.Session()
+        self.build_network(network_builder)
+        self.session.run(tf.global_variables_initializer())
+        self.saver = tf.train.Saver()
+
+    def build_network(self, network_builder):
+        with tf.variable_scope(self.name):
+            self.input, self.actions, self.q_target, self.Q_values = network_builder()
+
+            self.loss = tf.reduce_mean(tf.square(self.Q_values - self.q_target))
+            self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss)
+
+    def load_checkpoint(self, file):
+        self.saver.restore(self.session, file)
+
+    def save_checkpoint(self, file):
+        self.saver.save(self.session, file)
+
+    def close(self):
+        self.session.close()
+
+
+class Agent(object):
+    def __init__(self, n_actions, input_dims, name, network_builder):
+        self.n_actions = n_actions
+        self.action_space = [i for i in range(self.n_actions)]
+
+        self.q_eval = Network(learning_rate=learning_rate, n_actions=n_actions, name=name, input_dims=input_dims,
+                              network_builder=network_builder)
         self.batch_size = batch_size
-        self.optimizer = optimizers.Adam(learning_rate)
+
         self.gamma = discount_rate
+        self.epsilon = max_exploration_rate
+        self.epsilon_dec = exploration_decay_rate
+        self.epsilon_end = min_exploration_rate
 
-        self.number_of_actions, inputs, outputs, name = model_builder()
-        self.model = keras.Model(inputs=inputs, outputs=outputs, name=name)
+        self.memory_size = replay_memory_capacity
+        self.state_memory = np.zeros( (self.memory_size, *input_dims) )
+        self.new_state_memory = np.zeros( (self.memory_size, *input_dims) )
+        self.action_memory = np.zeros( (self.memory_size, self.n_actions), dtype=np.int8 )
+        self.reward_memory = np.zeros(self.memory_size)
+        self.terminal_memory = np.zeros(self.memory_size, dtype=np.int8)
+        self.memory_counter = 0
 
-        self.experience = {'state': [], 'action': [], 'reward': [], 'next_state': [], 'done': []}
-        self.max_experiences = replay_memory_capacity
-        self.min_experiences = batch_size
+    def store_transition(self, state, chosen_action, reward, new_state, terminal):
+        index = self.memory_counter % self.memory_size
 
-    def predict(self, inputs):
-        """
-        :param inputs: can either be a state or a batch of states
-        """
-        return self.model(np.atleast_2d(inputs.astype('float32')))
+        self.state_memory[index] = state
+        self.new_state_memory[index] = new_state
+        self.reward_memory[index] = reward
+        self.terminal_memory[index] = 1 - terminal  # 0 if it is a terminal state
 
-    @tf.function
-    def train(self, target_net):
-        # Do not train if has not acquired enough experience
-        if len(self.experience['state']) < self.min_experiences:
-            return 0
+        actions = np.zeros(self.n_actions)
+        actions[chosen_action] = 1.0
+        self.action_memory[index] = actions
 
-        # Select experiences from memory
-        ids = np.random.randint(low=0, high=len(self.experience['state']), size=self.batch_size)
+        self.memory_counter += 1
 
-        # Extract experience
-        states = np.asarray([self.experience['state'][i] for i in ids])
-        actions = np.asarray([self.experience['action'][i] for i in ids])
-        rewards = np.asarray([self.experience['reward'][i] for i in ids])
-        next_states = np.asarray([self.experience['next_state'][i] for i in ids])
-        is_last = np.asarray([self.experience['done'][i] for i in ids])
+    def choose_action(self, state):
+        # reshape the state because the input to the DQN is sized: none, *input_dims
+        state = state[np.newaxis, :]
 
-        # Get predicted value  -- not well understood yet
-        value_next = np.max(target_net.predict(next_states), axis=1)
-        actual_values = np.where(is_last, rewards, rewards + self.gamma * value_next)
+        if np.random.random() < self.epsilon:  # choose a random action
+            action = np.random.choice(self.action_space)
+        else:  # act based on neural network
+            actions = self.q_eval.session.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: state})
+            action = np.argmax(actions)
 
-        with tf.GradientTape() as tape:
-            selected_action_values = tf.math.reduce_sum(
-                self.predict(states) * tf.one_hot(actions, self.model.number_of_actions), axis=1)
-            loss = tf.math.reduce_sum(tf.square(actual_values - selected_action_values))
+        return action
 
-        variables = self.model.trainable_variables
-        gradients = tape.gradient(loss, variables)
+    def learn(self):
+        if self.memory_counter < self.batch_size:  # not enough memory
+            return
 
-        # Apply back propagation
-        self.optimizer.apply_gradients(zip(gradients, variables))
+        # Get the batch
+        max_mem = self.memory_counter if self.memory_counter < self.memory_size \
+                                    else self.memory_size
+        batch = np.random.choice(max_mem, self.batch_size)
 
-    def get_action(self, states, epsilon):
-        if np.random.random() < epsilon:
-            # Try something new
-            rnd = np.random.choice(self.number_of_actions)
-            output = np.zeros(self.number_of_actions)
-            output[int(rnd)] = 1
-            return get_output(output)
-        else:
-            # Use experience
-            return get_output(self.predict(np.atleast_2d(states)))
+        # Extract the batch
+        state_batch = self.state_memory[batch]
+        new_state_batch = self.new_state_memory[batch]
+        action_batch = self.action_memory[batch]
+        action_values = np.array(self.action_space, dtype=np.int8)
+        action_indices = np.dot(action_batch, action_values)
+        reward_batch = self.reward_memory[batch]
+        terminal_batch = self.terminal_memory[batch]
 
-    def add_experience(self, state, action, reward, next_state, done):
-        exp = {'state': state, 'action': action, 'reward': reward, 'next_state': next_state, 'done': done}
+        # Value of the current state
+        q_eval = self.q_eval.session.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: state_batch})
+        # Target
+        q_next = self.q_eval.session.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: new_state_batch})
 
-        # If has gathered max experience, drop the oldest one
-        if len(self.experience['state']) >= self.max_experiences:
-            for key in self.experience.keys():
-                self.experience[key].pop(0)
+        # Get the loss but do not take consideration of the possible reward of a terminal states
+        q_target = q_eval.copy()
+        batch_index = np.arange(self.batch_size, dtype=np.int32)
+        q_target[batch_index, action_indices] = reward_batch + self.gamma * np.max(q_next, axis=1) * terminal_batch
 
-        # Add the experience to the memory
-        for key, value in exp.items():
-            self.experience[key].append(value)
+        # Train
+        _ = self.q_eval.session.run(self.q_eval.train_op, feed_dict={
+            self.q_eval.input: state_batch,
+            self.q_eval.actions: action_batch,
+            self.q_eval.q_target: q_target
+        })
 
-    def copy_weights(self, train_net):
-        """
-        Make this NN the same as {@code TrainNet}
-        """
-        '''
-        variables1 = self.model.trainable_variables
-        variables2 = TrainNet.model.trainable_variables
+        # Update epsilon
+        self.epsilon = max(self.epsilon * self.epsilon_dec, self.epsilon_end)
 
-        for v1, v2 in zip(variables1, variables2):
-            v1.assign(v2.numpy())
-        '''
-        self.model = keras.models.clone_model(train_net.model)
+    def load_models(self, file):
+        self.q_eval.load_checkpoint(file)
 
+    def save_models(self, file):
+        self.q_eval.save_checkpoint(file)
 
+    def close(self):
+        self.q_eval.close()

@@ -7,8 +7,11 @@
 
 from src.constants import *
 
-from tensorflow import keras
+
 import numpy as np
+import tensorflow.compat.v1 as tf
+
+tf.disable_v2_behavior()
 
 #
 # UTILS
@@ -82,22 +85,32 @@ def get_distance_from_obstacle(map, start, dir):
 
 def omniscient_ai_model_builder():
     number_of_actions = 4
+    input_dimension = [COLUMNS * ROWS + 4]
 
-    inputs = keras.Input(shape=(COLUMNS * ROWS + 4,), name='input')
-    # x = keras.layers.Dense(COLUMNS * ROWS / 2, activation='linear', name='hidden_layer')(inputs)
-    # outputs = keras.layers.Dense(self.number_of_actions, activation='relu', name='output')(x)
-    outputs = keras.layers.Dense(number_of_actions, activation='relu', name='output')(inputs)
+    input = tf.placeholder(tf.float32, shape=[None, *input_dimension], name='inputs')
+    actions = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='actions_taken')
+    q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
 
-    return number_of_actions, inputs, outputs, "SnakeAI"
+    flat = tf.layers.flatten(input)
+    Q_values = tf.layers.dense(flat, units=number_of_actions)
+
+    return input, actions, q_target, Q_values
 
 
 def tri_directional_ai_model_builder():
     number_of_actions = 4
+    input_dimension = [10]
 
-    inputs = keras.Input(shape=(10,), name='input')
-    outputs = keras.layers.Dense(number_of_actions, activation='relu', name='output')(inputs)
+    input = tf.placeholder(tf.float32, shape=[None, *input_dimension], name='inputs')
+    actions = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='actions_taken')
+    q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
 
-    return number_of_actions, inputs, outputs, "SnakeAI"
+    flat = tf.layers.flatten(input)
+    dense1 = tf.layers.dense(flat, units=256, activation=tf.nn.relu)
+    dense2 = tf.layers.dense(dense1, units=256, activation=tf.nn.relu)
+    Q_values = tf.layers.dense(dense2, units=number_of_actions)
+
+    return input, actions, q_target, Q_values
 
 
 #

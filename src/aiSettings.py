@@ -14,20 +14,17 @@ from src.models import *
 discount_rate = 0.8  # must be between 0 and 1
 
 # The bigger the learning rate, the less the AI will use previous mistakes. It is often called Alpha
-learning_rate = 0.01  # must be between 0 and 1
+learning_rate = 0.0001  # must be between 0 and 1
 
-max_exploration_rate = 0.99  # must be between 0 and 1
-min_exploration_rate = 0.05  # must be between 0 and 1
-exploration_decay_rate = 0.9999  # must be between 0 and 1
-ss_exploration_decay_rate = 0.999  # must be between 0 and 1
-ss_thresh = 0.7
+#max_exploration_rate = 1  # must be between 0 and 1
+min_exploration_rate = 0.01  # must be between 0 and 1
+exploration_decay_rate = 0.999995  # must be between 0 and 1
+max_exploration_rate = min_exploration_rate
 
 # The number of experiences the AI will use to train after each step
 batch_size = 128  # must be greater than 1
 # The number of elements that can be contained in the memory
-replay_memory_capacity = 1024  # must be greater than 1
-# The number of times the AI will train before updating his semi-constant network
-update_frequency = 100  # must be greater than 1
+replay_memory_capacity = 16384  # must be greater than 1
 
 
 # The maximum number the AI is allowed to make to get some food. If he gets
@@ -40,12 +37,15 @@ AI_MAX_ALLOWED_MOVES = COLUMNS * ROWS  # must be less than 0 if infinite number 
 OMNISCIENT_MODEL = 0
 TRI_DIRECTIONAL = 1
 selected_model = TRI_DIRECTIONAL
+NAME = 'Orochimaru'
 
 if selected_model == TRI_DIRECTIONAL:
     AI_MODEL_BUILDER = tri_directional_ai_model_builder
     STATE_BUILDER = tri_directional_state_builder
     EMPTY_STATE_BUILDER = tri_directional_empty_state_builder
+    INPUT_DIMENSION = [10]
 else:
     AI_MODEL_BUILDER = omniscient_ai_model_builder
     STATE_BUILDER = omniscient_state_builder
     EMPTY_STATE_BUILDER = omniscient_empty_state_builder
+    INPUT_DIMENSION = [COLUMNS * ROWS + 4]

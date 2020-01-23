@@ -55,7 +55,7 @@ class Game(object):
         Make a step in the game. Get the action to perform from the player and check the result
         :return: the action and current reward
         """
-        reward_val = 0
+        reward_val = 50 * self.map.snake.get_score()
 
         # Get the player's action
         action = self.player.get_action(self.get_state())
@@ -66,10 +66,10 @@ class Game(object):
         if not self.map.snake.walk():
             # The snake died
             self.playing = False
-            reward_val = -1
+            reward_val -= 100
         elif self.map.check_food():  # The snake got some food
             self.map.snake.got_food()
-            reward_val = 1
+            reward_val += 50
 
         if self.starting:
             self.starting = False
@@ -84,7 +84,7 @@ class Game(object):
         self.player.train()
 
     def set_result(self, state, action, reward, next_state):
-        self.player.set_result(state, action, reward, next_state, self.playing)
+        self.player.set_result(state, action, reward, next_state, not self.playing)
 
     def draw(self, window):
         """
@@ -141,62 +141,38 @@ class HumanPlayer:
 
 class AIPlayer:
     def __init__(self, ai_model_builder):
-        self.brain = AI(ai_model_builder)
-        self.target = AI(ai_model_builder)
+        self.brain = Agent(n_actions=4, name=NAME, input_dims=INPUT_DIMENSION, network_builder=ai_model_builder)
         self.iteration = 0
-        self.epsilon = max_exploration_rate
 
     def get_action(self, state):
         self.iteration += 1
 
-        return self.brain.get_action(
-            state,
-            self.epsilon
-        )
+        return self.brain.choose_action(state)
 
     def train(self):
-        self.brain.train(self.target)
-
-        if self.iteration % update_frequency:
-            self.target.copy_weights(self.brain)
+        self.brain.learn()
 
     def set_result(self, state, action, reward, next_state, done):
-        self.brain.add_experience(state, action, reward, next_state, done)
+        self.brain.store_transition(state=state, chosen_action=action, reward=reward, new_state=next_state, terminal=done)
 
     def reset(self):
         self.iteration = 0
-        self.target.copy_weights(self.brain)
-
-        if self.epsilon > ss_thresh:
-            self.epsilon = max(ss_thresh, self.epsilon * ss_exploration_decay_rate)
-        else:
-            self.epsilon = max(min_exploration_rate, self.epsilon * exploration_decay_rate)
-
-
-class ParamsSerializer(object):
-    def __init__(self, epsilon, experience, model):
-        self.epsilon = epsilon
-        self.experience = experience
-        self.model = model
 
 
 def get_path(num):
     return DATA_DIR + '/' + str(num) + '.' + EXTENSION
 
 
-def get_params_path(num):
-    return DATA_DIR + '/' + str(num) + '.' + PARAMS_EXTENSION
-
-
 def read_ai_num(player, num):
-    with open(get_path(num), 'rb') as f:
-        params_serializer = pickle.load(f)
-        player.brain.model = tf.keras.models.model_from_json(params_serializer.model)
-        if not RESET_GREED:
-            player.epsilon = params_serializer.epsilon
+    path = get_path(num)
+    try:
+        player.brain.load_models(path)
+        return True
+    except Exception:
+        return False
 
 
-def save_ai_num(ai, num):
+def save_ai_num(player, num):
     path = get_path(num)
 
     if not os.path.exists(DATA_DIR):
@@ -204,8 +180,5 @@ def save_ai_num(ai, num):
     elif os.path.exists(path):
         os.remove(path)
 
-    json_string = ai.brain.model.to_json()
+    player.brain.save_models(path)
 
-    with open(path, 'wb') as f:
-        params_serializer = ParamsSerializer(ai.epsilon, ai.brain.experience, json_string)
-        pickle.dump(params_serializer, f)

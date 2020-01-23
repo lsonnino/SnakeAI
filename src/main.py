@@ -68,13 +68,9 @@ def main():
                 max_moves=(AI_MAX_ALLOWED_MOVES if AI_PLAYS else -1), initial_food_spawn=initial_food_spawn)
     # Load the snake
     if AI_PLAYS and LOAD_NUMBER >= 0:
-        if os.path.exists(get_path(LOAD_NUMBER)):
-            read_ai_num(game.player, LOAD_NUMBER)
+        if read_ai_num(game.player, LOAD_NUMBER):
             game_num = LOAD_NUMBER + 1
             ai_generation = LOAD_NUMBER
-
-    if AI_PLAYS:
-        game.player.brain.model.summary()
 
     # Keeps the game running
     running = True
@@ -143,7 +139,7 @@ def main():
             # Printing score
             print("AI score for gen " + str(ai_generation) + ": " + str(last_score))
             step = game.player.iteration
-            print("current step: " + str(step) + " - greed: " + str(round(game.player.epsilon * 100, 2)) + "%")
+            print("current step: " + str(step) + " - greed: " + str(round(game.player.brain.epsilon * 100, 2)) + "%")
 
             ai_generation += 1
         else:
@@ -160,6 +156,7 @@ def main():
 
     if AI_PLAYS:
         save_ai_num(game.player, game_num)
+        game.player.brain.close()
 
 
 snake_ai = compile('main()', 'snake_ai', 'exec')
