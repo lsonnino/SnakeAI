@@ -7,11 +7,11 @@
 
 from src.constants import *
 
-
 import numpy as np
 import tensorflow.compat.v1 as tf
 
 tf.disable_v2_behavior()
+
 
 #
 # UTILS
@@ -70,7 +70,8 @@ def get_distance_from_obstacle(map, start, dir):
     y += dy
     count = 1
 
-    while (0 <= x < COLUMNS and 0 <= y < ROWS) and (map.map[x, y] == EMPTY or map.map[x, y] == FOOD):
+    while (0 <= x < COLUMNS and 0 <= y < ROWS) and (map.map[x, y] == EMPTY or map.map[x, y] == FOOD) and \
+            (x, y) not in map.snake.body:
         x += dx
         y += dy
         count += 1

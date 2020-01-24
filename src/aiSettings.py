@@ -16,15 +16,15 @@ discount_rate = 0.8  # must be between 0 and 1
 # The bigger the learning rate, the less the AI will use previous mistakes. It is often called Alpha
 learning_rate = 0.0001  # must be between 0 and 1
 
-#max_exploration_rate = 1  # must be between 0 and 1
+# max_exploration_rate = 1  # must be between 0 and 1
 min_exploration_rate = 0.01  # must be between 0 and 1
-exploration_decay_rate = 0.999995  # must be between 0 and 1
-max_exploration_rate = min_exploration_rate
+exploration_decay_rate = 0.99999  # must be between 0 and 1
+max_exploration_rate = 0.1
 
 # The number of experiences the AI will use to train after each step
 batch_size = 128  # must be greater than 1
 # The number of elements that can be contained in the memory
-replay_memory_capacity = 16384  # must be greater than 1
+replay_memory_capacity = 65536  # must be greater than 1
 
 
 # The maximum number the AI is allowed to make to get some food. If he gets

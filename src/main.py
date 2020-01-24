@@ -19,6 +19,7 @@
 ################################################################
 
 from src.game import *
+import matplotlib.pyplot as plt
 
 
 def ai_action_to_text(direction):
@@ -34,7 +35,24 @@ def ai_action_to_text(direction):
         return "None"
 
 
+def plot(scores, step_history, number_of_games):
+    x = [i + 1 for i in range(number_of_games)]
+
+    plt.figure()
+    plt.title('Scores')
+    plt.plot(x, scores)
+    plt.savefig('scores.png')
+
+    plt.figure()
+    plt.title('Steps')
+    plt.plot(x, step_history)
+    plt.savefig('steps.png')
+
+
 def main():
+    score_history = []
+    steps_history = []
+
     if GRAPHICS:
         # Start the game
         pygame.init()
@@ -140,6 +158,8 @@ def main():
             print("AI score for gen " + str(ai_generation) + ": " + str(last_score))
             step = game.player.iteration
             print("current step: " + str(step) + " - greed: " + str(round(game.player.brain.epsilon * 100, 2)) + "%")
+            score_history.append(last_score)
+            steps_history.append(step)
 
             ai_generation += 1
         else:
@@ -157,6 +177,8 @@ def main():
     if AI_PLAYS:
         save_ai_num(game.player, game_num)
         game.player.brain.close()
+
+        plot(score_history, steps_history, game_num - LOAD_NUMBER - 1)
 
 
 snake_ai = compile('main()', 'snake_ai', 'exec')

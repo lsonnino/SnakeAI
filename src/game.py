@@ -55,7 +55,7 @@ class Game(object):
         Make a step in the game. Get the action to perform from the player and check the result
         :return: the action and current reward
         """
-        reward_val = 50 * self.map.snake.get_score()
+        reward_val = 0
 
         # Get the player's action
         action = self.player.get_action(self.get_state())
@@ -69,7 +69,7 @@ class Game(object):
             reward_val -= 100
         elif self.map.check_food():  # The snake got some food
             self.map.snake.got_food()
-            reward_val += 50
+            reward_val += 50 * self.map.snake.get_score()
 
         if self.starting:
             self.starting = False
