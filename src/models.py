@@ -100,10 +100,7 @@ def omniscient_ai_model_builder():
     return input, actions, q_target, Q_values
 
 
-def tri_directional_ai_model_builder():
-    number_of_actions = 4
-    input_dimension = [10]
-
+def base_ai_model_builder(number_of_actions, input_dimension):
     input = tf.placeholder(tf.float32, shape=[None, *input_dimension], name='inputs')
     actions = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='actions_taken')
     q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
@@ -114,6 +111,14 @@ def tri_directional_ai_model_builder():
     Q_values = tf.layers.dense(dense2, units=number_of_actions)
 
     return input, actions, q_target, Q_values
+
+
+def tri_directional_ai_model_builder():
+    return base_ai_model_builder(number_of_actions=4, input_dimension=[10])
+
+
+def four_directional_ai_model_builder():
+    return base_ai_model_builder(number_of_actions=4, input_dimension=[11])
 
 
 #
@@ -163,6 +168,34 @@ def tri_directional_state_builder(map, alive, first):
         get_distance_from_obstacle(map, head, direction_1),
         get_distance_from_obstacle(map, head, direction_2),
         get_distance_from_obstacle(map, head, direction_3)
+    ]
+
+    food_distance = [
+        head[0] - map.food_position[0],
+        head[1] - map.food_position[1],
+    ]
+
+    tmp_state = merge_states(distances, food_distance)
+    tmp_state = merge_states(tmp_state, [map.snake.get_score()])
+    return merge_states(tmp_state, snake_direction_to_array(looking_direction))
+
+
+def four_directional_empty_state_builder():
+    return np.zeros(7)
+
+
+def four_directional_state_builder(map, alive, first):
+    if not alive:
+        return merge_states(four_directional_empty_state_builder(), snake_direction_to_array(map.snake.direction))
+
+    looking_direction = map.snake.direction
+    head = map.snake.body[0]
+
+    distances = [
+        get_distance_from_obstacle(map, head, ( 1,  0)),
+        get_distance_from_obstacle(map, head, (-1,  0)),
+        get_distance_from_obstacle(map, head, ( 0,  1)),
+        get_distance_from_obstacle(map, head, ( 0, -1))
     ]
 
     food_distance = [
