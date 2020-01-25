@@ -8,10 +8,16 @@
 ################################################################
 
 import os
-import pickle
 
 from src.objects import *
 from src.ai import *
+from math import sqrt, pow
+
+
+def get_distance_from_food(map):
+    head = map.snake.body[0]
+    tmp = (head[0] - map.food_position[0])**2 + (head[1] - map.food_position[1])**2
+    return sqrt(tmp)
 
 
 class Game(object):
@@ -56,6 +62,7 @@ class Game(object):
         :return: the action and current reward
         """
         reward_val = 0
+        old_distance_from_food = get_distance_from_food(self.map)
 
         # Get the player's action
         action = self.player.get_action(self.get_state())
@@ -70,6 +77,13 @@ class Game(object):
         elif self.map.check_food():  # The snake got some food
             self.map.snake.got_food()
             reward_val += 50 * self.map.snake.get_score()
+        else:
+            weight = 25 * pow(0.9, self.map.snake.get_score())
+            if weight < 1:
+                weight = 0
+            distance_from_food = get_distance_from_food(self.map)
+            distance_delta = distance_from_food - old_distance_from_food
+            reward_val += weight if distance_delta < 0 else -weight * 1.1
 
         if self.starting:
             self.starting = False
@@ -141,7 +155,7 @@ class HumanPlayer:
 
 class AIPlayer:
     def __init__(self, ai_model_builder):
-        self.brain = Agent(n_actions=4, name=NAME, input_dims=INPUT_DIMENSION, network_builder=ai_model_builder)
+        self.brain = Agent(n_actions=4, name=AI_NAME, input_dims=INPUT_DIMENSION, network_builder=ai_model_builder)
         self.iteration = 0
 
     def get_action(self, state):

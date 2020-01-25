@@ -68,13 +68,15 @@ def get_distance_from_obstacle(map, start, dir):
     x, y = start
     x += dx
     y += dy
-    count = 1
+    count = 0
 
     while (0 <= x < COLUMNS and 0 <= y < ROWS) and (map.map[x, y] == EMPTY or map.map[x, y] == FOOD) and \
             (x, y) not in map.snake.body:
         x += dx
         y += dy
         count += 1
+
+    count += 1
 
     return count
 
@@ -107,8 +109,8 @@ def tri_directional_ai_model_builder():
     q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
 
     flat = tf.layers.flatten(input)
-    dense1 = tf.layers.dense(flat, units=256, activation=tf.nn.relu)
-    dense2 = tf.layers.dense(dense1, units=256, activation=tf.nn.relu)
+    dense1 = tf.layers.dense(flat, units=32, activation=tf.nn.relu)
+    dense2 = tf.layers.dense(dense1, units=32, activation=tf.nn.relu)
     Q_values = tf.layers.dense(dense2, units=number_of_actions)
 
     return input, actions, q_target, Q_values
@@ -134,9 +136,7 @@ def tri_directional_empty_state_builder():
 
 
 def tri_directional_state_builder(map, alive, first):
-    if first:
-        return merge_states(tri_directional_empty_state_builder(), snake_direction_to_array(NONE))
-    elif not alive:
+    if not alive:
         return merge_states(tri_directional_empty_state_builder(), snake_direction_to_array(map.snake.direction))
 
     looking_direction = map.snake.direction

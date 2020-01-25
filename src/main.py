@@ -63,7 +63,7 @@ def main():
         window = pygame.display.set_mode(WIN_SIZE)
 
         # Setting the window name
-        pygame.display.set_caption(NAME)
+        pygame.display.set_caption(NAME + " - " + AI_NAME)
 
         # Setting up the clock
         clock = pygame.time.Clock()
@@ -87,12 +87,11 @@ def main():
     # Load the snake
     if AI_PLAYS and LOAD_NUMBER >= 0:
         if read_ai_num(game.player, LOAD_NUMBER):
-            game_num = LOAD_NUMBER + 1
-            ai_generation = LOAD_NUMBER
+            ai_generation = LOAD_NUMBER + 1
 
     # Keeps the game running
     running = True
-    while running and (NUMBER_OF_GAMES < 0 or game_num < NUMBER_OF_GAMES):
+    while running and (NUMBER_OF_GAMES < 0 or game_num <= NUMBER_OF_GAMES):
         # Reset the game
         game.reset()
         state = game.get_state()
@@ -114,6 +113,8 @@ def main():
                     running = False
                     playing = False
                     break
+                elif keys[pygame.K_SPACE]:  # Pause the game
+                    continue
 
             # Make a step in the game
             action, reward = game.step()
@@ -154,6 +155,10 @@ def main():
 
         # Pass to next generation
         if AI_PLAYS:
+            # Save the AI
+            if game_num % SAVE_EVERY == 0:
+                save_ai_num(game.player, ai_generation)
+
             # Printing score
             print("AI score for gen " + str(ai_generation) + ": " + str(last_score))
             step = game.player.iteration
@@ -166,19 +171,15 @@ def main():
             # Printing score
             print("Game score: " + str(last_score))
 
-        # Save the ai
-        if AI_PLAYS and game_num % SAVE_EVERY == 0:
-            save_ai_num(game.player, game_num)
-
         game_num += 1
 
         game.next_episode()
 
     if AI_PLAYS:
-        save_ai_num(game.player, game_num)
+        save_ai_num(game.player, ai_generation - 1)
         game.player.brain.close()
 
-        plot(score_history, steps_history, game_num - LOAD_NUMBER - 1)
+        plot(score_history, steps_history, game_num - 1)
 
 
 snake_ai = compile('main()', 'snake_ai', 'exec')

@@ -16,11 +16,6 @@ discount_rate = 0.8  # must be between 0 and 1
 # The bigger the learning rate, the less the AI will use previous mistakes. It is often called Alpha
 learning_rate = 0.0001  # must be between 0 and 1
 
-# max_exploration_rate = 1  # must be between 0 and 1
-min_exploration_rate = 0.01  # must be between 0 and 1
-exploration_decay_rate = 0.99999  # must be between 0 and 1
-max_exploration_rate = 0.1
-
 # The number of experiences the AI will use to train after each step
 batch_size = 128  # must be greater than 1
 # The number of elements that can be contained in the memory
@@ -36,8 +31,8 @@ AI_MAX_ALLOWED_MOVES = COLUMNS * ROWS  # must be less than 0 if infinite number 
 
 OMNISCIENT_MODEL = 0
 TRI_DIRECTIONAL = 1
-selected_model = TRI_DIRECTIONAL
-NAME = 'Orochimaru'
+selected_model = TRI_DIRECTIONAL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+AI_NAME = 'Orochimaru'
 
 if selected_model == TRI_DIRECTIONAL:
     AI_MODEL_BUILDER = tri_directional_ai_model_builder
@@ -49,3 +44,21 @@ else:
     STATE_BUILDER = omniscient_state_builder
     EMPTY_STATE_BUILDER = omniscient_empty_state_builder
     INPUT_DIMENSION = [COLUMNS * ROWS + 4]
+
+# Exploration rate
+
+FULL_EXPLORATION_RATE_MODEL = 0
+SMALL_EXPLORATION_RATE_MODEL = 1
+NO_EXPLORATION_RATE_MODEL = 2
+selected_exploration_rate_model = NO_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+if selected_exploration_rate_model == FULL_EXPLORATION_RATE_MODEL:
+    max_exploration_rate = 1  # must be between 0 and 1
+    min_exploration_rate = 0.01  # must be between 0 and 1
+elif selected_exploration_rate_model == SMALL_EXPLORATION_RATE_MODEL:
+    max_exploration_rate = 0.5  # must be between 0 and 1
+    min_exploration_rate = 0.01  # must be between 0 and 1
+elif selected_exploration_rate_model == NO_EXPLORATION_RATE_MODEL:
+    max_exploration_rate = 0  # must be between 0 and 1
+    min_exploration_rate = 0  # must be between 0 and 1
+exploration_decay_rate = 0.99999  # must be between 0 and 1
