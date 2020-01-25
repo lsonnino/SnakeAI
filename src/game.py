@@ -83,7 +83,7 @@ class Game(object):
                 weight = 0
             distance_from_food = get_distance_from_food(self.map)
             distance_delta = distance_from_food - old_distance_from_food
-            reward_val += weight if distance_delta < 0 else -weight * 1.1
+            reward_val += weight if distance_delta < 0 else -weight
 
         if self.starting:
             self.starting = False
