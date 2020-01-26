@@ -11,13 +11,13 @@
 # General Constants
 NAME = "SnakeAI"
 AI_PLAYS = True
-NUMBER_OF_GAMES = 3000  # -1 to play infinite games
+NUMBER_OF_GAMES = 10000  # -1 to play infinite games
 SAVE_EVERY = 1000  # Must be greater than 0
 LOAD_NUMBER = 10000  # -1 to start from the beginning
 DATA_DIR = "data"
 EXTENSION = "snake"
 PARAMS_EXTENSION = "params"
-GRAPHICS = False
+GRAPHICS = True
 
 FONT = "Arial"
 FONT_SIZE = 20

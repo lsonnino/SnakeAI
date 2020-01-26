@@ -44,7 +44,7 @@ elif selected_model == FOUR_DIRECTIONAL:
     AI_MODEL_BUILDER = four_directional_ai_model_builder
     STATE_BUILDER = four_directional_state_builder
     EMPTY_STATE_BUILDER = four_directional_empty_state_builder
-    INPUT_DIMENSION = [11]
+    INPUT_DIMENSION = [7]
 else:
     AI_MODEL_BUILDER = omniscient_ai_model_builder
     STATE_BUILDER = omniscient_state_builder
@@ -56,14 +56,14 @@ else:
 FULL_EXPLORATION_RATE_MODEL = 0
 SMALL_EXPLORATION_RATE_MODEL = 1
 NO_EXPLORATION_RATE_MODEL = 2
-selected_exploration_rate_model = SMALL_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+selected_exploration_rate_model = NO_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 if selected_exploration_rate_model == FULL_EXPLORATION_RATE_MODEL:
     max_exploration_rate = 1  # must be between 0 and 1
     min_exploration_rate = 0.01  # must be between 0 and 1
 elif selected_exploration_rate_model == SMALL_EXPLORATION_RATE_MODEL:
     max_exploration_rate = 0.5  # must be between 0 and 1
-    min_exploration_rate = 0.01  # must be between 0 and 1
+    min_exploration_rate = 0.001  # must be between 0 and 1
 elif selected_exploration_rate_model == NO_EXPLORATION_RATE_MODEL:
     max_exploration_rate = 0  # must be between 0 and 1
     min_exploration_rate = 0  # must be between 0 and 1

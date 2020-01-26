@@ -76,7 +76,7 @@ def get_distance_from_obstacle(map, start, dir):
         y += dy
         count += 1
 
-    count += 1
+    # count += 1  # If removed, could it improve the skills?
 
     return count
 
@@ -118,7 +118,7 @@ def tri_directional_ai_model_builder():
 
 
 def four_directional_ai_model_builder():
-    return base_ai_model_builder(number_of_actions=4, input_dimension=[11])
+    return base_ai_model_builder(number_of_actions=4, input_dimension=[7])
 
 
 #
@@ -186,9 +186,8 @@ def four_directional_empty_state_builder():
 
 def four_directional_state_builder(map, alive, first):
     if not alive:
-        return merge_states(four_directional_empty_state_builder(), snake_direction_to_array(map.snake.direction))
+        return four_directional_empty_state_builder()
 
-    looking_direction = map.snake.direction
     head = map.snake.body[0]
 
     distances = [
@@ -204,5 +203,4 @@ def four_directional_state_builder(map, alive, first):
     ]
 
     tmp_state = merge_states(distances, food_distance)
-    tmp_state = merge_states(tmp_state, [map.snake.get_score()])
-    return merge_states(tmp_state, snake_direction_to_array(looking_direction))
+    return merge_states(tmp_state, [map.snake.get_score()])
