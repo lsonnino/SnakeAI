@@ -3,6 +3,12 @@
 # Author: Lorenzo Sonnino
 # GitHub: https://github.com/lsonnino
 #
+# This file contains the functions defining the AI's input and
+# behaviour which are:
+#     - an AI model
+#     - an empty state builder
+#     - a state builder
+#
 ################################################################
 
 from src.constants import *
@@ -81,8 +87,23 @@ def get_distance_from_obstacle(map, start, dir):
     return count
 
 
+def base_ai_model_builder(number_of_actions, input_dimension):
+    input = tf.placeholder(tf.float32, shape=[None, *input_dimension], name='inputs')
+    actions = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='actions_taken')
+    q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
+
+    flat = tf.layers.flatten(input)
+    dense1 = tf.layers.dense(flat, units=32, activation=tf.nn.relu)
+    dense2 = tf.layers.dense(dense1, units=32, activation=tf.nn.relu)
+    Q_values = tf.layers.dense(dense2, units=number_of_actions)
+
+    return input, actions, q_target, Q_values
+
 #
 # AI MODEL BUILDERS
+#
+# @param: none
+# @return: the input placeholder, the output placeholder, the q_target placeholder and the Q_values output layer
 #
 
 
@@ -100,19 +121,6 @@ def omniscient_ai_model_builder():
     return input, actions, q_target, Q_values
 
 
-def base_ai_model_builder(number_of_actions, input_dimension):
-    input = tf.placeholder(tf.float32, shape=[None, *input_dimension], name='inputs')
-    actions = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='actions_taken')
-    q_target = tf.placeholder(tf.float32, shape=[None, number_of_actions], name='q_values')
-
-    flat = tf.layers.flatten(input)
-    dense1 = tf.layers.dense(flat, units=32, activation=tf.nn.relu)
-    dense2 = tf.layers.dense(dense1, units=32, activation=tf.nn.relu)
-    Q_values = tf.layers.dense(dense2, units=number_of_actions)
-
-    return input, actions, q_target, Q_values
-
-
 def tri_directional_ai_model_builder():
     return base_ai_model_builder(number_of_actions=4, input_dimension=[10])
 
@@ -123,6 +131,16 @@ def four_directional_ai_model_builder():
 
 #
 # STATE MODEL BUILDERS
+#
+# Empty state builder:
+# @param: none
+# @return: a state when no input are to be given (the end state for instance)
+#
+# State builder:
+# @param map: the map object
+# @param alive: whether or not the snake is alive
+# @param first: whether or not it is the first state
+# @return: the corresponding state which match the input given by the AI Model Builder
 #
 
 def omniscient_empty_state_builder():

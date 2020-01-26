@@ -85,6 +85,9 @@ class Game(object):
             distance_delta = distance_from_food - old_distance_from_food
             reward_val += weight if distance_delta < 0 else -weight
 
+        if len(self.map.snake.body) == COLUMNS * ROWS:  # The game ended
+            reward_val = 10000
+
         if self.starting:
             self.starting = False
 
