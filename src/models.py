@@ -82,8 +82,6 @@ def get_distance_from_obstacle(map, start, dir):
         y += dy
         count += 1
 
-    # count += 1  # If removed, could it improve the skills?
-
     return count
 
 

@@ -11,7 +11,7 @@ from src.models import *
 
 # The bigger the discount rate, the more importance the AI will accord to future rewards
 # in comparison with the present ones. It is often called Gamma
-discount_rate = 0.8  # must be between 0 and 1
+discount_rate = 0.9  # default: 0.8  # must be between 0 and 1
 
 # The bigger the learning rate, the less the AI will use previous mistakes. It is often called Alpha
 learning_rate = 0.0001  # must be between 0 and 1
@@ -56,15 +56,22 @@ else:
 FULL_EXPLORATION_RATE_MODEL = 0
 SMALL_EXPLORATION_RATE_MODEL = 1
 NO_EXPLORATION_RATE_MODEL = 2
+CONSTANT_EXPLORATION_RATE_MODEL = 3
 selected_exploration_rate_model = NO_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+# max_exploration_rate: must be between 0 and 1
+# min_exploration_rate: must be between 0 and 1
 if selected_exploration_rate_model == FULL_EXPLORATION_RATE_MODEL:
-    max_exploration_rate = 1  # must be between 0 and 1
-    min_exploration_rate = 0.01  # must be between 0 and 1
+    max_exploration_rate = 1
+    min_exploration_rate = 0.01
 elif selected_exploration_rate_model == SMALL_EXPLORATION_RATE_MODEL:
-    max_exploration_rate = 0.5  # must be between 0 and 1
-    min_exploration_rate = 0.001  # must be between 0 and 1
+    max_exploration_rate = 0.5
+    min_exploration_rate = 0.001
+elif selected_exploration_rate_model == CONSTANT_EXPLORATION_RATE_MODEL:
+    max_exploration_rate = 0.001
+    min_exploration_rate = 0.001
 elif selected_exploration_rate_model == NO_EXPLORATION_RATE_MODEL:
-    max_exploration_rate = 0  # must be between 0 and 1
-    min_exploration_rate = 0  # must be between 0 and 1
+    max_exploration_rate = 0
+    min_exploration_rate = 0
+
 exploration_decay_rate = 0.99999  # must be between 0 and 1

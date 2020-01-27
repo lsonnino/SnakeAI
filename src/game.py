@@ -79,7 +79,7 @@ class Game(object):
             reward_val += 50 * self.map.snake.get_score()
         else:
             weight = 25 * pow(0.9, self.map.snake.get_score())
-            if weight < 1:
+            if weight < 1:  # when score > 30, weight = 0
                 weight = 0
             distance_from_food = get_distance_from_food(self.map)
             distance_delta = distance_from_food - old_distance_from_food
