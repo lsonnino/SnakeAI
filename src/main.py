@@ -64,7 +64,7 @@ def plot(scores, step_history, epsilon_history, number_of_games):
     plot_figure(x, combined, epsilon_history, axis=axis[2, 0], title='Optimization')
     plot_figure(a, b, c, axis=axis[2, 1], title='Optimization means')
 
-    plt.savefig('data.png', bbox_inches='tight', dpi=100)
+    plt.savefig('training_data.png', bbox_inches='tight', dpi=100)
 
 
 def on_exit(score_history, steps_history, epsilon_history, game_num):

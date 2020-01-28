@@ -107,18 +107,18 @@ def play():
             game.draw(window)
 
             # Draw the texts
-            text_surface = font.render("Score: " + str(last_score), False, TEXT_COLOR)
+            text_surface = font.render("Score: " + str(last_score), True, TEXT_COLOR)
             # Merge the texts with the window
             window.blit(text_surface, (10, 10))
             if AI_PLAYS:
                 # Generation
-                text_surface = font.render("Generation: " + str(ai_generation), False, TEXT_COLOR)
+                text_surface = font.render("Generation: " + str(ai_generation), True, TEXT_COLOR)
                 # Merge the texts with the window
                 window.blit(text_surface, (10, WIN_SIZE[1] - 10 - FONT_SIZE))
 
                 # Action
                 text = "Action: " + ai_action_to_text(game.map.snake.direction)
-                text_surface = font.render(text, False, TEXT_COLOR)
+                text_surface = font.render(text, True, TEXT_COLOR)
                 # Merge the texts with the window
                 window.blit(text_surface, (10, WIN_SIZE[1] - 20 - 2 * FONT_SIZE))
 
