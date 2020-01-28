@@ -70,10 +70,9 @@ class Game(object):
             self.map.snake.direction = action
 
         # Make the snake's move and check result
-        if not self.map.snake.walk():
-            # The snake died
+        if not self.map.snake.walk():  # The snake died
             self.playing = False
-            reward_val -= 100
+            reward_val -= 100 + 40 * min(self.map.snake.get_score() - 2, 0)
         elif self.map.check_food():  # The snake got some food
             self.map.snake.got_food()
             reward_val += 50 * self.map.snake.get_score()

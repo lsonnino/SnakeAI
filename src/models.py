@@ -146,7 +146,7 @@ def omniscient_empty_state_builder():
 
 
 def omniscient_state_builder(map, alive, first):
-    if alive or first:
+    if not alive or first:
         return merge_states(omniscient_empty_state_builder(), snake_direction_to_array(NONE))
     else:
         return merge_states(entire_map_to_state(map), snake_direction_to_array(map.snake.direction))

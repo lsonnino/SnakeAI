@@ -57,7 +57,7 @@ FULL_EXPLORATION_RATE_MODEL = 0
 SMALL_EXPLORATION_RATE_MODEL = 1
 NO_EXPLORATION_RATE_MODEL = 2
 CONSTANT_EXPLORATION_RATE_MODEL = 3
-selected_exploration_rate_model = NO_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+selected_exploration_rate_model = SMALL_EXPLORATION_RATE_MODEL  # <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 # max_exploration_rate: must be between 0 and 1
 # min_exploration_rate: must be between 0 and 1
@@ -66,7 +66,7 @@ if selected_exploration_rate_model == FULL_EXPLORATION_RATE_MODEL:
     min_exploration_rate = 0.01
 elif selected_exploration_rate_model == SMALL_EXPLORATION_RATE_MODEL:
     max_exploration_rate = 0.5
-    min_exploration_rate = 0.001
+    min_exploration_rate = 0.005
 elif selected_exploration_rate_model == CONSTANT_EXPLORATION_RATE_MODEL:
     max_exploration_rate = 0.001
     min_exploration_rate = 0.001
